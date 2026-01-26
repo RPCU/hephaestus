@@ -1,0 +1,110 @@
+{
+  "pins": {
+    "disko": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "disko"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v1.12.0",
+      "revision": "7121f74b976481bc36877abaf52adab2a178fcbe",
+      "url": "https://api.github.com/repos/nix-community/disko/tarball/v1.12.0",
+      "hash": "sha256-eDoSOhxGEm2PykZFa/x9QG5eTH0MJdiJ9aR00VAofXE="
+    },
+    "home-manager": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "home-manager"
+      },
+      "branch": "release-25.11",
+      "submodules": false,
+      "revision": "20561be440a11ec57a89715480717baf19fe6343",
+      "url": "https://github.com/nix-community/home-manager/archive/20561be440a11ec57a89715480717baf19fe6343.tar.gz",
+      "hash": "sha256-O8VTGey1xxiRW+Fpb+Ps9zU7ShmxUA1a7cMTcENCVNg="
+    },
+    "kubeadm-v1.35.0": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "kubernetes",
+        "repo": "kubernetes"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v1.35.0",
+      "revision": "2049416c7235eeec9a413c38472708e49af3ed88",
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/tarball/v1.35.0",
+      "hash": "sha256-AT1/4RhnVK/mAoNVqPIfSwbzD8VNRqKumOpE0fidJ74=",
+      "frozen": true
+    },
+    "kubelet-v1.35.0": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "kubernetes",
+        "repo": "kubernetes"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v1.35.0",
+      "revision": "2049416c7235eeec9a413c38472708e49af3ed88",
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/tarball/v1.35.0",
+      "hash": "sha256-AT1/4RhnVK/mAoNVqPIfSwbzD8VNRqKumOpE0fidJ74=",
+      "frozen": true
+    },
+    "kubernetes-latest": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "kubernetes",
+        "repo": "kubernetes"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v1.35.0",
+      "revision": "2049416c7235eeec9a413c38472708e49af3ed88",
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/tarball/v1.35.0",
+      "hash": "sha256-AT1/4RhnVK/mAoNVqPIfSwbzD8VNRqKumOpE0fidJ74="
+    },
+    "nixbook": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "didactiklabs",
+        "repo": "nixbook"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "c05e820f034b83643f2335fa20605d3b0978dc65",
+      "url": "https://github.com/didactiklabs/nixbook/archive/c05e820f034b83643f2335fa20605d3b0978dc65.tar.gz",
+      "hash": "sha256-KHitaT4eQMG+SoBq4R5bjpbvkDJvR3Fir9+by0MGNRg="
+    },
+    "nixpkgs": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-25.11",
+      "submodules": false,
+      "revision": "d9bc5c7dceb30d8d6fafa10aeb6aa8a48c218454",
+      "url": "https://github.com/NixOS/nixpkgs/archive/d9bc5c7dceb30d8d6fafa10aeb6aa8a48c218454.tar.gz",
+      "hash": "sha256-y7RPKl/jJ/KAP/VKLMghMgXTlvNIJMHKskl8/Uuar7o="
+    }
+  },
+  "version": 7
+}
