@@ -31,6 +31,7 @@ in
       authorizedKeys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC+Z8AEpTitOovoh9qCVUIiXA6Z9I0w0U789x5JbBNTX aamoyel@alesio-desktop"
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKtzv1NKNZqM0A6PZjYmOVIqv6rzi9OO94Uq0tze+Pkj aamoyel@nishinoya"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ2Em7nvUo8ornmctARCywP+RFnJK1ynezpk6yCPeVPv aamoyel@nishinoya-mallow"
       ];
     })
     (mkUser {
