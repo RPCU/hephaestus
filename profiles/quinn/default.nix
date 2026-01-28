@@ -82,7 +82,14 @@ in
     };
   };
   customNixOSModules = {
-    networkManager.enable = true;
+    networkManager = {
+      enable = true;
+      vswitch = {
+        enable = true;
+        interface = "enp0s31f6";
+        privateAddress = "10.0.0.4";
+      };
+    };
     kubernetes = {
       enable = true;
       version = {
