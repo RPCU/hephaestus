@@ -21,6 +21,7 @@ in
       '';
     };
   };
+  services.netbird.enable = true;
   boot = {
     initrd = {
       availableKernelModules = [
