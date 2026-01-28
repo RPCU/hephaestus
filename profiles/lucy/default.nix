@@ -18,7 +18,7 @@ let
   privateVlanid = "4000";
   installKubevip = pkgs.writeShellScriptBin "installKubevip" ''
     set -euo pipefail
-    alias kubevip="ctr image pull ghcr.io/kube-vip/kube-vip:${kubevipVersion}; ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:${kubevipVersion} vip /kube-vip"
+    alias kube-vip="ctr image pull ghcr.io/kube-vip/kube-vip:${kubevipVersion}; ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:${kubevipVersion} vip /kube-vip"
     kube-vip manifest pod --interface ${privateInterface}.${privateVlanid} --address ${apiserverVip} --controlplane --services --arp --leaderElection --k8sConfigPath=/etc/kubernetes/super-admin.conf | tee /etc/kubernetes/manifests/kube-vip.yaml
   '';
 in
