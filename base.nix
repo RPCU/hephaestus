@@ -81,6 +81,7 @@ in
     ./nixosModules/ginx.nix
     ./nixosModules/sysctl.nix
     ./nixosModules/getRevision.nix
+    ./nixosModules/rpcuIaaSCP.nix
     (import ./nixosModules/kubernetes {
       inherit
         pkgs
