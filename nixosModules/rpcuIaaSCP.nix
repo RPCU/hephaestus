@@ -22,8 +22,28 @@ in
           kind: KubeletConfiguration
           apiVersion: kubelet.config.k8s.io/v1beta1
           maxPods: 200
+          rotateCertificates: true
+          imageMaximumGCAge: 30d
+          imageGCLowThresholdPercent: 70
+          imageGCHighThresholdPercent: 85
           featureGates:
             SidecarContainers: true
+          cgroupDriver: systemd
+          enforceNodeAllocatable:
+            - pods
+            - kube-reserved
+            - system-reserved
+          kubeReserved:
+            cpu: "500m"
+            memory: "1Gi"
+            ephemeral-storage: "2Gi"
+          systemReserved:
+            cpu: "500m"
+            memory: "1Gi"
+          evictionHard:
+            memory.available: "500Mi"
+            nodefs.available: "10%"
+            imagefs.available: "15%"
         '';
       };
     };
