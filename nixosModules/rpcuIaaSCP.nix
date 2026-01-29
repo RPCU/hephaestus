@@ -18,17 +18,33 @@ in
   config = lib.mkIf cfg.enable {
     environment = {
       etc = {
+        "kubernetes/audit/policy.yaml".text = ''
+          apiVersion: audit.k8s.io/v1
+          kind: Policy
+          omitStages:
+            - "RequestReceived"
+            - "ResponseStarted"
+            - "ResponseComplete"
+          rules:
+            # 1. Capture 'create' and 'delete' for EVERYTHING
+            - level: Metadata
+              verbs: ["create", "delete"]
+            # 2. Explicitly drop everything else (get, list, watch, patch, update)
+            - level: None
+        '';
         "kubernetes/kubelet/config.d/00-config.conf".text = ''
           kind: KubeletConfiguration
           apiVersion: kubelet.config.k8s.io/v1beta1
           maxPods: 200
           rotateCertificates: true
-          imageMaximumGCAge: 30d
+          imageMaximumGCAge: 720h
           imageGCLowThresholdPercent: 70
           imageGCHighThresholdPercent: 85
           featureGates:
             SidecarContainers: true
           cgroupDriver: systemd
+          kubeReservedCgroup: /kubepods.slice
+          systemReservedCgroup: /system.slice
           enforceNodeAllocatable:
             - pods
             - kube-reserved
