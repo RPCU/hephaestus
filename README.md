@@ -1,3 +1,5 @@
+> Hephaestus: The god of fire, smithing, and masonry.
+
 # Installation
 
 #### - Easy Install and upgrades
@@ -90,38 +92,40 @@ colmena apply # or merge to main to auto-apply it.
 
 To add yourself to the `rpcu` team, follow these steps:
 
-1.  **Create your user directory:**
-    Create a new directory in `users/rpcu/` matching your desired username.
-    ```bash
-    mkdir -p users/rpcu/<your-username>
-    ```
+1. **Create your user directory:**
+   Create a new directory in `users/rpcu/` matching your desired username.
 
-2.  **Create a `default.nix`:**
-    Inside your new directory, create a `default.nix` file. You can add your personal configurations here.
-    ```nix
-    # users/rpcu/<your-username>/default.nix
-    { ... }:
-    {
-      # imports = [ ./gitConfig.nix ]; # Optional: Add other imports if needed
-    }
-    ```
+   ```bash
+   mkdir -p users/rpcu/<your-username>
+   ```
 
-3.  **Register your user:**
-    Edit `users/rpcu/default.nix` and add a new `mkUser` block to the `imports` list.
-    ```nix
-    # users/rpcu/default.nix
-    {
-      # ... existing imports
-      imports = [
-        # ... other users
-        (mkUser {
-          username = "<your-username>";
-          userImports = [ ./<your-username> ];
-          authorizedKeys = [
-            "ssh-ed25519 AAAA..." # Your public SSH key(s)
-          ];
-        })
-      ];
-    }
-    ```
+2. **Create a `default.nix`:**
+   Inside your new directory, create a `default.nix` file. You can add your personal configurations here.
 
+   ```nix
+   # users/rpcu/<your-username>/default.nix
+   { ... }:
+   {
+     # imports = [ ./gitConfig.nix ]; # Optional: Add other imports if needed
+   }
+   ```
+
+3. **Register your user:**
+   Edit `users/rpcu/default.nix` and add a new `mkUser` block to the `imports` list.
+
+   ```nix
+   # users/rpcu/default.nix
+   {
+     # ... existing imports
+     imports = [
+       # ... other users
+       (mkUser {
+         username = "<your-username>";
+         userImports = [ ./<your-username> ];
+         authorizedKeys = [
+           "ssh-ed25519 AAAA..." # Your public SSH key(s)
+         ];
+       })
+     ];
+   }
+   ```
