@@ -105,6 +105,7 @@ in
         networking:
           serviceSubnet: '10.96.0.0/20'
           podSubnet: '${podCidr}'
+          dnsDomain: 'openstack.local'
         kubernetesVersion: '${kubeadmVersion}'
         controlPlaneEndpoint: '${apiserverVip}'
         apiServer:

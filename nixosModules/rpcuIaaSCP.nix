@@ -42,24 +42,6 @@ in
           imageGCHighThresholdPercent: 85
           featureGates:
             SidecarContainers: true
-          cgroupDriver: systemd
-          kubeReservedCgroup: /kubepods.slice
-          systemReservedCgroup: /system.slice
-          enforceNodeAllocatable:
-            - pods
-            - kube-reserved
-            - system-reserved
-          kubeReserved:
-            cpu: "500m"
-            memory: "1Gi"
-            ephemeral-storage: "2Gi"
-          systemReserved:
-            cpu: "500m"
-            memory: "1Gi"
-          evictionHard:
-            memory.available: "500Mi"
-            nodefs.available: "10%"
-            imagefs.available: "15%"
         '';
       };
     };
