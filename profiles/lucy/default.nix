@@ -11,19 +11,86 @@ let
     imports = [ ./fastfetchConfig.nix ];
   };
   privateAddress = "10.0.0.2";
+  privateAddressMakise = "10.0.0.3";
+  privateAddressQuinn = "10.0.0.4";
   kubeadmVersion = "v1.35.0";
   apiserverVip = "10.0.0.5";
   privateInterface = "eno1";
+  kubevipVersion = "v1.0.3";
+  podCidr = "10.244.0.0/16";
+  installKubevip = pkgs.writeShellScriptBin "installKubevip" ''
+    set -euo pipefail
+    ctr image pull ghcr.io/kube-vip/kube-vip:${kubevipVersion} ;
+    kubevip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:${kubevipVersion} vip /kube-vip"
+    $kubevip manifest pod \
+      --interface ${privateInterface}.4000 \
+      --address ${apiserverVip} \
+      --controlplane --services --arp --leaderElection \
+      --k8sConfigPath=/etc/kubernetes/super-admin.conf | \
+      tee /etc/kubernetes/manifests/kube-vip.yaml
+  '';
   initKubeadm = pkgs.writeShellScriptBin "initKubeadm" ''
     set -euo pipefail
-      installKubevip
-      kubeadm init --config /etc/kubernetes/kubeadm/bootstrap.yaml --upload-certs
+
+    # 1. Help Menu Logic
+    if [[ "$\{@:-}" == *"--help"* || "$\{@:-}" == *"-h"* ]]; then
+      echo "Usage: initKubeadm"
+      echo ""
+      echo "Description:"
+      echo "  - Deploys kubevip manifests for HA."
+      echo "  - Initializes the Kubernetes cluster using bootstrap.yaml."
+      echo "  - Filters output to display ONLY the join token and certificate key."
+      exit 0
+    fi
+
+    # 2. Setup Static Pods
+    installKubevip
+
+    # 3. Run Init and Extract Credentials
+    # We redirect stdout to a temporary variable to parse it
+    echo "Initializing cluster (this may take a minute)..." >&2
+    OUTPUT=$(kubeadm init --config /etc/kubernetes/kubeadm/bootstrap.yaml --upload-certs)
+    kubevip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:${kubevipVersion} vip /kube-vip"
+    $kubevip manifest pod \
+      --interface ${privateInterface}.4000 \
+      --address ${apiserverVip} \
+      --controlplane --services --arp --leaderElection \
+      --k8sConfigPath=/etc/kubernetes/admin.conf | \
+      tee /etc/kubernetes/manifests/kube-vip.yaml
+
+
+    TOKEN=$(echo "$OUTPUT" | grep -oP '(?<=--token )[^ ]+' | head -n 1)
+    CERT_KEY=$(echo "$OUTPUT" | grep -oP '(?<=--certificate-key )[^ ]+' | head -n 1)
+
+    echo "Configuring kubectl access..." >&2
+    mkdir -p "$HOME/.kube"
+    cp /etc/kubernetes/admin.conf "$HOME/.kube/config" 2>/dev/null
+    sudo chown $(id -u):$(id -g) "$HOME/.kube/config"
+
+    echo "--------------------------------------------------"
+    echo "CLUSTER INITIALIZED SUCCESSFULLY"
+    echo "--------------------------------------------------"
+
+    # 2. Print the helper command
+    echo "---"
+    kubectl get no -o wide
+    echo "---"
+    echo ""
+    if [[ -n "$TOKEN" && -n "$CERT_KEY" ]]; then
+        echo "To join another Control Plane node, run:"
+        echo ""
+        echo "joinCPKubeadm $TOKEN $CERT_KEY"
+    else
+        echo "Error: Could not extract join credentials from kubeadm output."
+        exit 1
+    fi
   '';
 in
 {
   environment = {
     systemPackages = [
       initKubeadm
+      installKubevip
     ];
     etc = {
       "kubernetes/kubelet/config.d/10-config.conf".text = ''
@@ -34,18 +101,21 @@ in
       "kubernetes/kubeadm/bootstrap.yaml".text = ''
         apiVersion: kubeadm.k8s.io/v1beta3
         kind: ClusterConfiguration
+        clusterName: 'openstack'
         networking:
           serviceSubnet: '10.96.0.0/20'
-          podSubnet: '10.244.0.0/16'
+          podSubnet: '${podCidr}'
         kubernetesVersion: '${kubeadmVersion}'
         controlPlaneEndpoint: '${apiserverVip}'
         apiServer:
           certSANs:
             - 'openstack.rpcu.lan'
-            -  '${apiserverVip}'
+            - '${apiserverVip}'
+            - '${privateAddress}'
+            - '${privateAddressQuinn}'
+            - '${privateAddressMakise}'
           extraArgs:
             enable-admission-plugins: DefaultTolerationSeconds
-            bind-address: "${privateAddress}"
         ---
         apiVersion: kubeadm.k8s.io/v1beta3
         kind: InitConfiguration
@@ -54,6 +124,8 @@ in
         localAPIEndpoint:
           advertiseAddress: '${privateAddress}'
           bindPort: 6443
+        nodeRegistration:
+          taints: []
       '';
     };
   };
