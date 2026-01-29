@@ -88,9 +88,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "1314a48193e8530a791ebc3cb4fa7fe6db543690",
-      "url": "https://github.com/didactiklabs/nixbook/archive/1314a48193e8530a791ebc3cb4fa7fe6db543690.tar.gz",
-      "hash": "sha256-HYIJZ/tOcvdVTcy4y8+YVnKRFF7tozafp52G5x4kNgg="
+      "revision": "b7420e5ff6b3b6d2c24dc7662ce451d5884e204b",
+      "url": "https://github.com/didactiklabs/nixbook/archive/b7420e5ff6b3b6d2c24dc7662ce451d5884e204b.tar.gz",
+      "hash": "sha256-6Nj6mTGQ3XSmK16HDwgVvN4F2PS0riCfNqkPD/KItE8="
     },
     "nixpkgs": {
       "type": "Git",
@@ -101,9 +101,9 @@
       },
       "branch": "nixos-25.11",
       "submodules": false,
-      "revision": "1cd347bf3355fce6c64ab37d3967b4a2cb4b878c",
-      "url": "https://github.com/NixOS/nixpkgs/archive/1cd347bf3355fce6c64ab37d3967b4a2cb4b878c.tar.gz",
-      "hash": "sha256-Mjx6p96Pkefks3+aA+72lu1xVehb6mv2yTUUqmSet6Q="
+      "revision": "fa83fd837f3098e3e678e6cf017b2b36102c7211",
+      "url": "https://github.com/NixOS/nixpkgs/archive/fa83fd837f3098e3e678e6cf017b2b36102c7211.tar.gz",
+      "hash": "sha256-e7VO/kGLgRMbWtpBqdWl0uFg8Y2XWFMdz0uUJvlML8o="
     }
   },
   "version": 7
