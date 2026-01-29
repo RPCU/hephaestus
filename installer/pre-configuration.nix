@@ -40,7 +40,7 @@ in
           }
                 echo Starting final configuration...
                 sleep 2
-                ginx --source https://github.com/rpcu/nixos-forge -b main --now -- colmena apply-local --sudo
+                ginx --source https://github.com/rpcu/hephaestus -b main --now -- colmena apply-local --sudo
                 sleep 10
                 sudo reboot
         '';

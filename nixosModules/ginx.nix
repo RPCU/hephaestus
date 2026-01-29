@@ -11,10 +11,10 @@ let
   osupdate = pkgs.writeShellScriptBin "osupdate" ''
     set -euo pipefail
     echo last applied revisions: $(${pkgs.jq}/bin/jq .rev /etc/nixos/version)
-    echo applying revision: "$(${pkgs.git}/bin/git ls-remote https://github.com/rpcu/nixos-forge HEAD | awk '{print $1}')"...
+    echo applying revision: "$(${pkgs.git}/bin/git ls-remote https://github.com/rpcu/hephaestus HEAD | awk '{print $1}')"...
 
     echo Running ginx...
-    ${ginx}/bin/ginx --source https://github.com/rpcu/nixos-forge -b main --now -- ${pkgs.colmena}/bin/colmena apply-local --sudo
+    ${ginx}/bin/ginx --source https://github.com/rpcu/hephaestus -b main --now -- ${pkgs.colmena}/bin/colmena apply-local --sudo
   '';
 in
 {
@@ -45,7 +45,7 @@ in
           ];
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
-            ExecStart = "${pkgs.bash}/bin/bash -c '${ginx}/bin/ginx --source https://github.com/rpcu/nixos-forge -b main -n 60 --exit-on-fail -- colmena apply-local'";
+            ExecStart = "${pkgs.bash}/bin/bash -c '${ginx}/bin/ginx --source https://github.com/rpcu/hephaestus -b main -n 60 --exit-on-fail -- colmena apply-local'";
             Restart = "always";
           };
         };
