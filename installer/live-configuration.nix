@@ -24,7 +24,7 @@ let
   isoType = if cloud == "true" then "-cloud" else "";
 in
 {
-  isoImage.isoName = lib.mkForce "${config.isoImage.isoBaseName}-${config.system.nixos.label}-${pkgs.stdenv.hostPlatform.system}-${partition}${isoType}.iso";
+  image.fileName = lib.mkForce "${config.image.isoBaseName}-${config.system.nixos.label}-${pkgs.stdenv.hostPlatform.system}-${partition}${isoType}.iso";
   imports = [
     "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix"
     (import ./installer.nix { inherit disko diskoCfg; })

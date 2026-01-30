@@ -60,6 +60,7 @@ in
       pkgs.iproute2
       pkgs.iptables
       pkgs.socat
+      pkgs.openssl
       pkgs.ethtool
       pkgs.cri-tools
       pkgs.conntrack-tools

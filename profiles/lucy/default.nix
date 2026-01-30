@@ -153,6 +153,7 @@ in
   };
   customNixOSModules = {
     rpcuIaaSCP.enable = true;
+    sysctlSecure.enable = true;
     networkManager = {
       enable = true;
       vswitch = {

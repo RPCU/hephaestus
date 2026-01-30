@@ -47,4 +47,12 @@ in
       "baremetal"
     ];
   };
+  sunraku = createConfiguration {
+    hostName = "sunraku";
+    host = "46.224.209.24";
+    tags = [
+      "rpcu"
+      "vps"
+    ];
+  };
 }
