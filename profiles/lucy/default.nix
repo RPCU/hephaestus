@@ -152,7 +152,13 @@ in
     };
   };
   customNixOSModules = {
-    rpcuIaaSCP.enable = true;
+    rpcuIaaSCP = {
+      enable = true;
+      networking = {
+        interface = "${privateInterface}";
+        additionalIps = [ "178.63.143.219" ];
+      };
+    };
     sysctlSecure.enable = true;
     networkManager = {
       enable = true;

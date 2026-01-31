@@ -105,8 +105,14 @@ in
     };
   };
   customNixOSModules = {
-    rpcuIaaSCP.enable = true;
-    sysctlSecure = true;
+    sysctlSecure.enable = true;
+    rpcuIaaSCP = {
+      enable = true;
+      networking = {
+        interface = "${privateInterface}";
+        additionalIps = [ "178.63.143.219" ];
+      };
+    };
     networkManager = {
       enable = true;
       vswitch = {
