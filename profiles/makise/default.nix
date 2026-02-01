@@ -11,6 +11,8 @@ let
     imports = [ ./fastfetchConfig.nix ];
   };
   privateAddress = "10.0.0.3";
+  privateAddressLucy = "10.0.0.2";
+  privateAddressQuinn = "10.0.0.4";
   apiserverVip = "10.0.0.5";
   privateInterface = "eno1";
   kubevipVersion = "v1.0.3";
@@ -104,15 +106,29 @@ in
       };
     };
   };
+  services.keepalived = {
+    enable = true;
+    vrrpInstances.VI_1 = {
+      interface = "${privateInterface}.4000";
+      state = "BACKUP";
+      virtualRouterId = 51;
+      priority = 99;
+      unicastSrcIp = "${privateAddress}";
+      unicastPeers = [
+        "${privateAddressLucy}"
+        "${privateAddressQuinn}"
+      ];
+      virtualIps = [
+        {
+          addr = "178.63.143.219/32";
+          dev = "${privateInterface}";
+        }
+      ];
+    };
+  };
   customNixOSModules = {
     sysctlSecure.enable = true;
-    rpcuIaaSCP = {
-      enable = true;
-      networking = {
-        interface = "${privateInterface}";
-        additionalIps = [ "178.63.143.219" ];
-      };
-    };
+    rpcuIaaSCP.enable = true;
     networkManager = {
       enable = true;
       vswitch = {

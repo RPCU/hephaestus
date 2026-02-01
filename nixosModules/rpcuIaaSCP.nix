@@ -14,18 +14,6 @@ in
       default = false;
       description = "";
     };
-    networking = {
-      interface = lib.mkOption {
-        type = lib.types.str;
-        default = "eno1";
-        description = "Interface to configure additional IPs on";
-      };
-      additionalIps = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "List of additional IP addresses to assign to the interface";
-      };
-    };
   };
   config = lib.mkIf cfg.enable {
     environment = {
@@ -72,27 +60,6 @@ in
     };
     networking = {
       useDHCP = lib.mkDefault true;
-      interfaces = lib.mkIf (cfg.networking.additionalIps != [ ]) {
-        ${cfg.networking.interface} = {
-          useDHCP = true;
-          ipv4.addresses = map (
-            ipStr:
-            let
-              match = builtins.match "([0-9.]+)/([0-9]+)" ipStr;
-            in
-            if match != null then
-              {
-                address = builtins.elemAt match 0;
-                prefixLength = lib.strings.toInt (builtins.elemAt match 1);
-              }
-            else
-              {
-                address = ipStr;
-                prefixLength = 32;
-              }
-          ) cfg.networking.additionalIps;
-        };
-      };
     };
     services.netbird.enable = true;
     boot = {

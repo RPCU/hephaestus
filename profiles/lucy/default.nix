@@ -151,14 +151,28 @@ in
       };
     };
   };
-  customNixOSModules = {
-    rpcuIaaSCP = {
-      enable = true;
-      networking = {
-        interface = "${privateInterface}";
-        additionalIps = [ "178.63.143.219" ];
-      };
+  services.keepalived = {
+    enable = true;
+    vrrpInstances.VI_1 = {
+      interface = "${privateInterface}.4000";
+      state = "BACKUP";
+      virtualRouterId = 51;
+      priority = 100;
+      unicastSrcIp = "${privateAddress}";
+      unicastPeers = [
+        "${privateAddressMakise}"
+        "${privateAddressQuinn}"
+      ];
+      virtualIps = [
+        {
+          addr = "178.63.143.219/32";
+          dev = "${privateInterface}";
+        }
+      ];
     };
+  };
+  customNixOSModules = {
+    rpcuIaaSCP.enable = true;
     sysctlSecure.enable = true;
     networkManager = {
       enable = true;
