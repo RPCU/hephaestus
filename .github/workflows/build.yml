@@ -1,0 +1,22 @@
+name: Eval NixOS Profiles
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read nixpkgs revision from npins
+        id: npins
+        run: |
+          URL=$(jq -r '.pins.nixpkgs.url' npins/sources.json)
+          echo "nixpkgs_url=$URL" >> $GITHUB_OUTPUT
+      - uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=${{ steps.npins.outputs.nixpkgs_url }}
+      - name: Eval with Colmena
+        run: |
+          nix-shell -p colmena --run "colmena eval --instantiate -E '{ nodes, ... }: builtins.mapAttrs (n: v: v.config.system.build.toplevel) nodes'"
