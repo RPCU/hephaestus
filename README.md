@@ -1,6 +1,10 @@
 > Hephaestus: The god of fire, smithing, and masonry.
 
-# Installation
+## Requirements
+
+Follow requirements [here](https://docs.rpcu.io/onboarding/#prerequisites)
+
+## Installation
 
 #### - Easy Install and upgrades
 
@@ -9,14 +13,12 @@
 Build the iso with the following command:
 
 ```bash
-nix-shell
 buildIso <partitions profile> <true or false cloud-init or name of the profile>
 ```
 
 Build the qcow2 with the following command:
 
 ```bash
-nix-shell
 buildQcow2 <profile>
 ```
 
@@ -37,7 +39,6 @@ colmena apply
 It is possible to test the iso in a vm by doing the following:
 
 ```bash
-nix-shell
 runIso <partitions profile> <true or false, enable cloud-init>
 ```
 

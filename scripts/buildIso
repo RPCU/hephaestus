@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+mkdir -p output
+DISK_ARG=""
+if [[ -n "${3:-}" ]]; then
+  DISK_ARG="--argstr disk ${3}"
+fi
+cp $(nix-build default.nix -A buildIso --argstr partition "${1:-default60G}" --argstr cloud "${2:-false}" $DISK_ARG)/iso/* output/
