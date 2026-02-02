@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+mkdir -p output
+chmod +w output -R
+cp $(nix-build default.nix -A buildQcow2 --argstr profile $1)/nixos.qcow2 output/$1.qcow2

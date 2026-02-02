@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+mkdir -p output
+chmod +w output -R
+$(nix-build default.nix -A ociQcow2 --argstr profile $1) > output/$1-qcow2-oci.tar
