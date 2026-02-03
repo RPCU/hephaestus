@@ -36,9 +36,9 @@ in
       };
     };
   };
-  boot.loader.efi.canTouchEfiVariables = true;
   boot = {
     loader = {
+      efi.canTouchEfiVariables = true;
       grub = {
         enable = true;
         device = "/dev/sda";
@@ -65,7 +65,9 @@ in
       ];
       services.lvm.enable = true;
     };
-    kernelModules = [ "kvm-intel" ];
+    kernelModules = [
+      "kvm-intel"
+    ];
   };
   fileSystems = {
     "/" = {

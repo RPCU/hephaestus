@@ -84,7 +84,10 @@ in
         ];
         services.lvm.enable = true;
       };
-      kernelModules = [ "kvm-intel" ];
+      kernelModules = [
+        "kvm-intel"
+        "rbd"
+      ];
       extraModulePackages = [ ];
 
       loader.systemd-boot.enable = true;
