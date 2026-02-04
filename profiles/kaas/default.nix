@@ -113,6 +113,10 @@ in
       didactiklabs.enable = true;
     };
     ginx.enable = false;
+    chrony = {
+      enable = true;
+      vmconfig = true; 
+    };
   };
   imports = [
     (import ../../users/rpcu {

@@ -91,6 +91,7 @@ in
         ;
     })
     (import ./nixosModules/networkManager.nix { inherit lib config pkgs; })
+    (import ./nixosModules/chrony.nix { inherit lib config pkgs; })
     (import "${sources.home-manager}/nixos")
     hostProfile
   ];

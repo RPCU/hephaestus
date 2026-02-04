@@ -148,6 +148,7 @@ in
       didactiklabs.enable = true;
     };
     ginx.enable = true;
+    chrony.enable = true;
   };
   imports = [
     (import ../../users/rpcu {

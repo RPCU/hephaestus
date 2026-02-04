@@ -90,6 +90,7 @@ in
     caCertificates = {
       didactiklabs.enable = true;
     };
+    chrony.enable = true;
   };
   imports = [
     (import ../../users/rpcu {
