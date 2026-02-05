@@ -25,7 +25,7 @@ in
   };
   lucy = createConfiguration {
     hostName = "lucy";
-    host = "94.130.137.123";
+    host = "lucy";
     tags = [
       "rpcu"
       "baremetal"
@@ -33,7 +33,7 @@ in
   };
   makise = createConfiguration {
     hostName = "makise";
-    host = "94.130.162.42";
+    host = "makise";
     tags = [
       "rpcu"
       "baremetal"
@@ -41,7 +41,7 @@ in
   };
   quinn = createConfiguration {
     hostName = "quinn";
-    host = "176.9.219.89";
+    host = "quinn";
     tags = [
       "rpcu"
       "baremetal"
@@ -49,7 +49,7 @@ in
   };
   sunraku = createConfiguration {
     hostName = "sunraku";
-    host = "46.224.209.24";
+    host = "sunraku";
     tags = [
       "rpcu"
       "vps"
