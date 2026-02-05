@@ -73,7 +73,11 @@ let
 
     # 2. Print the helper command
     echo "---"
-    kubectl get no -o wide
+    kubectl label --overwrite nodes --all openstack-control-plane=enabled
+    kubectl label --overwrite nodes --all openstack-compute-node=enabled
+    kubectl label --overwrite nodes --all openvswitch=enabled
+    kubectl label --overwrite nodes --all linuxbridge=enabled
+    kubectl get no -o wide --show-labels
     echo "---"
     echo ""
     if [[ -n "$TOKEN" && -n "$CERT_KEY" ]]; then

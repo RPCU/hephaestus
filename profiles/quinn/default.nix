@@ -61,7 +61,11 @@ let
     cp /etc/kubernetes/admin.conf "$HOME/.kube/config" 2>/dev/null
     sudo chown $(id -u):$(id -g) "$HOME/.kube/config"
     echo "---"
-    kubectl get no -o wide
+    kubectl label --overwrite nodes --all openstack-control-plane=enabled
+    kubectl label --overwrite nodes --all openstack-compute-node=enabled
+    kubectl label --overwrite nodes --all openvswitch=enabled
+    kubectl label --overwrite nodes --all linuxbridge=enabled
+    kubectl get no -o wide --show-labels
     echo "---"
   '';
 in
@@ -100,7 +104,7 @@ in
       kubelet = {
         serviceConfig = {
           Environment = [
-            ''KUBELET_KUBECONFIG_ARGS="--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --node-ip=${privateAddress}"''
+            ''KUBELET_KUBECONFIG_ARGS="--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --node-ip=${privateAddress} --node-labels=openstack-control-plane=enabled,openstack-compute-node=enabled,openvswitch=enabled,linuxbridge=enabled"''
           ];
         };
       };
