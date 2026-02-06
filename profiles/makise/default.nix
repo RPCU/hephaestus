@@ -99,6 +99,11 @@ in
       '';
     };
   };
+  systemd.network.links."00-eno1" = {
+    matchConfig.PermanentMACAddress = "30:9c:23:d3:51:37";
+    linkConfig.Name = "eno1";
+  };
+
   systemd = {
     services = {
       kubelet = {
