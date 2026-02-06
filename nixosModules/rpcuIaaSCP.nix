@@ -100,6 +100,9 @@ in
         "openvswitch"
         "gre"
         "vxlan"
+        "bridge"
+        "ip6_tables"
+        "ebtables"
       ];
       extraModulePackages = [ ];
 
