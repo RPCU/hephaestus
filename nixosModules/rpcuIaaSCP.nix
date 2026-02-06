@@ -58,6 +58,16 @@ in
         '';
       };
     };
+    users.groups.openvswitch.gid = 42424;
+    systemd.tmpfiles.rules = [
+      "d /run/openvswitch 0755 openvswitch openvswitch -"
+    ];
+    users.users.openvswitch = {
+      isSystemUser = true;
+      group = "openvswitch";
+      uid = 42424;
+      description = "Open vSwitch service user";
+    };
     networking = {
       useDHCP = lib.mkDefault true;
     };
@@ -87,6 +97,9 @@ in
       kernelModules = [
         "kvm-intel"
         "rbd"
+        "openvswitch"
+        "gre"
+        "vxlan"
       ];
       extraModulePackages = [ ];
 
