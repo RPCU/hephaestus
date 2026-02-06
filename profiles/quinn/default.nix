@@ -14,7 +14,7 @@ let
   privateAddressLucy = "10.0.0.2";
   privateAddressMakise = "10.0.0.3";
   apiserverVip = "10.0.0.5";
-  privateInterface = "enp0s31f6";
+  privateInterface = "eno1";
   kubevipVersion = "v1.0.3";
   installKubevip = pkgs.writeShellScriptBin "installKubevip" ''
     set -euo pipefail
@@ -98,6 +98,10 @@ in
         address: "${privateAddress}"
       '';
     };
+  };
+  systemd.network.links."00-eno1" = {
+    matchConfig.PermanentMACAddress = "4c:52:62:0a:82:93";
+    linkConfig.Name = "eno1";
   };
   systemd = {
     services = {
