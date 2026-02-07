@@ -16,6 +16,50 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
+    security.sudo.extraRules = [
+      {
+        users = [ "neutron" ];
+        commands = [
+          {
+            command = "ALL";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+      }
+    ];
+    users = {
+    };
+    users.groups = {
+      neutron = { };
+      openvswitch.gid = 42424;
+      libvirt-qemu.gid = 64055;
+
+      nova.gid = 64060;
+    };
+    users.users = {
+      neutron = {
+        isSystemUser = true;
+        group = "neutron";
+      };
+      openvswitch = {
+        isSystemUser = true;
+        group = "openvswitch";
+        uid = 42424;
+        description = "Open vSwitch service user";
+      };
+      libvirt-qemu = {
+        isSystemUser = true;
+        group = "libvirt-qemu";
+        uid = 64055;
+      };
+      nova = {
+        isSystemUser = true;
+        group = "nova";
+        uid = 64060;
+        description = "OpenStack Nova User";
+        home = "/var/lib/nova";
+      };
+    };
     environment = {
       etc = {
         "kubernetes/audit/policy.yaml".text = ''
@@ -57,17 +101,14 @@ in
             imagefs.available: "15%"
         '';
       };
+
+      # 3. Ensure dnsmasq is available on the host path if needed,
+      # but for the container, we'll still need a trick in the ConfigMap.
+      systemPackages = [ pkgs.dnsmasq ];
     };
-    users.groups.openvswitch.gid = 42424;
     systemd.tmpfiles.rules = [
       "d /run/openvswitch 0755 openvswitch openvswitch -"
     ];
-    users.users.openvswitch = {
-      isSystemUser = true;
-      group = "openvswitch";
-      uid = 42424;
-      description = "Open vSwitch service user";
-    };
     networking = {
       useDHCP = lib.mkDefault true;
     };
