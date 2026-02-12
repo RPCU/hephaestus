@@ -15,7 +15,7 @@ let
   privateAddressMakise = "10.0.0.3";
   apiserverVip = "10.0.0.5";
   privateInterface = "eno1";
-  kubevipVersion = "v1.0.3";
+  kubevipVersion = "v1.0.4";
   installKubevip = pkgs.writeShellScriptBin "installKubevip" ''
     set -euo pipefail
     ctr image pull ghcr.io/kube-vip/kube-vip:${kubevipVersion} ;
