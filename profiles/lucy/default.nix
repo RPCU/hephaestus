@@ -13,7 +13,7 @@ let
   privateAddress = "10.0.0.2";
   privateAddressMakise = "10.0.0.3";
   privateAddressQuinn = "10.0.0.4";
-  kubeadmVersion = "v1.35.0";
+  kubeadmVersion = "v1.35.1";
   apiserverVip = "10.0.0.5";
   privateInterface = "eno1";
   kubevipVersion = "v1.0.3";
@@ -195,7 +195,7 @@ in
       enable = true;
       version = {
         kubeadm = "${kubeadmVersion}";
-        kubelet = "v1.35.0";
+        kubelet = "v1.35.1";
       };
     };
     caCertificates = {
