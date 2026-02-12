@@ -161,6 +161,7 @@ in
           enable = true;
           path = [
             "${kubeadm-bin}"
+            "${kubelet-bin}"
             pkgs.jq
           ];
           wantedBy = [ "multi-user.target" ];
