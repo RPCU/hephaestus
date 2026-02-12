@@ -16,7 +16,7 @@ let
   kubeadmVersion = "v1.35.1";
   apiserverVip = "10.0.0.5";
   privateInterface = "eno1";
-  kubevipVersion = "v1.0.3";
+  kubevipVersion = "v1.0.4";
   podCidr = "10.244.0.0/16";
   installKubevip = pkgs.writeShellScriptBin "installKubevip" ''
     set -euo pipefail
