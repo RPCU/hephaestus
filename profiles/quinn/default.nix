@@ -14,14 +14,14 @@ let
   privateAddressLucy = "10.0.0.2";
   privateAddressMakise = "10.0.0.3";
   apiserverVip = "10.0.0.5";
-  privateInterface = "eno1";
+  primaryInterface = "eno1";
   kubevipVersion = "v1.0.4";
   installKubevip = pkgs.writeShellScriptBin "installKubevip" ''
     set -euo pipefail
     ctr image pull ghcr.io/kube-vip/kube-vip:${kubevipVersion} ;
     kubevip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:${kubevipVersion} vip /kube-vip"
     $kubevip manifest pod \
-      --interface ${privateInterface}.4000 \
+      --interface ${primaryInterface}.4000 \
       --address ${apiserverVip} \
       --controlplane --services --arp --leaderElection \
       --k8sConfigPath=/etc/kubernetes/admin.conf | \
@@ -117,7 +117,7 @@ in
   services.keepalived = {
     enable = true;
     vrrpInstances.VI_1 = {
-      interface = "${privateInterface}.4000";
+      interface = "${primaryInterface}.4000";
       state = "BACKUP";
       virtualRouterId = 51;
       priority = 98;
@@ -129,7 +129,7 @@ in
       virtualIps = [
         {
           addr = "178.63.143.219/32";
-          dev = "${privateInterface}";
+          dev = "${primaryInterface}";
         }
       ];
     };
@@ -141,8 +141,21 @@ in
       enable = true;
       vswitch = {
         enable = true;
-        interface = "${privateInterface}";
-        privateAddress = "${privateAddress}";
+        interface = "${primaryInterface}";
+        vlans = [
+          {
+            vlanId = 4000;
+            privateAddress = "${privateAddress}";
+            prefixLength = 24;
+            mtu = 1400;
+          }
+          {
+            vlanId = 4001;
+            privateAddress = "10.10.0.4";
+            prefixLength = 16;
+            mtu = 1400;
+          }
+        ];
       };
     };
     kubernetes = {
