@@ -6,29 +6,9 @@
 }:
 let
   cfg = config.customNixOSModules.networkManager;
-  vlanName = "${cfg.vswitch.interface}.${toString cfg.vswitch.vlanId}";
-in
-{
-  options.customNixOSModules.networkManager = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Enable network configuration";
-    };
 
-    vswitch = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Enable Hetzner vSwitch configuration with VLAN support";
-      };
-
-      interface = lib.mkOption {
-        type = lib.types.str;
-        default = "eno1";
-        description = "Parent network interface for vSwitch";
-      };
-
+  vlanInterfaceType = lib.types.submodule {
+    options = {
       vlanId = lib.mkOption {
         type = lib.types.int;
         default = 4000;
@@ -53,6 +33,50 @@ in
       };
     };
   };
+in
+{
+  options.customNixOSModules.networkManager = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable network configuration";
+    };
+
+    vswitch = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable Hetzner vSwitch configuration with VLAN support";
+      };
+
+      interface = lib.mkOption {
+        type = lib.types.str;
+        default = "eno1";
+        description = "Parent network interface for vSwitch";
+      };
+
+      vlans = lib.mkOption {
+        type = lib.types.listOf vlanInterfaceType;
+        default = [ ];
+        description = "List of VLAN interfaces to configure";
+        example = lib.literalExpression ''
+          [
+            {
+              vlanId = 4000;
+              privateAddress = "10.0.0.2";
+              prefixLength = 24;
+              mtu = 1400;
+            }
+            {
+              vlanId = 4001;
+              privateAddress = "10.1.0.2";
+              prefixLength = 24;
+            }
+          ]
+        '';
+      };
+    };
+  };
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
@@ -67,22 +91,32 @@ in
       systemd.network.enable = true;
     })
 
-    (lib.mkIf cfg.vswitch.enable {
+    (lib.mkIf (cfg.vswitch.enable && cfg.vswitch.vlans != [ ]) {
       networking = {
-        vlans.${vlanName} = {
-          id = cfg.vswitch.vlanId;
-          interface = cfg.vswitch.interface;
-        };
+        vlans = lib.listToAttrs (
+          map (vlan: {
+            name = "${cfg.vswitch.interface}.${toString vlan.vlanId}";
+            value = {
+              id = vlan.vlanId;
+              interface = cfg.vswitch.interface;
+            };
+          }) cfg.vswitch.vlans
+        );
 
-        interfaces.${vlanName} = {
-          ipv4.addresses = [
-            {
-              address = cfg.vswitch.privateAddress;
-              prefixLength = cfg.vswitch.prefixLength;
-            }
-          ];
-          mtu = cfg.vswitch.mtu;
-        };
+        interfaces = lib.listToAttrs (
+          map (vlan: {
+            name = "${cfg.vswitch.interface}.${toString vlan.vlanId}";
+            value = {
+              ipv4.addresses = [
+                {
+                  address = vlan.privateAddress;
+                  prefixLength = vlan.prefixLength;
+                }
+              ];
+              mtu = vlan.mtu;
+            };
+          }) cfg.vswitch.vlans
+        );
       };
     })
   ];
