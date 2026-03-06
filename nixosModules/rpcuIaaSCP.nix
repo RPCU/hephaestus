@@ -7,7 +7,8 @@
 let
   cfg = config.customNixOSModules.rpcuIaaSCP;
 
-  kubeadmVersion = "v1.35.1";
+  kubeadmVersion = "v1.35.2";
+  kubeletVersion = "v1.35.1";
   apiserverVip = "10.0.0.5";
   primaryInterface = "eno1";
   kubevipVersion = "v1.0.4";
@@ -18,7 +19,7 @@ let
   installKubevip = pkgs.writeShellScriptBin "installKubevip" ''
     set -euo pipefail
 
-    # Determine which config to use. Prefer admin.conf if it exists, 
+    # Determine which config to use. Prefer admin.conf if it exists,
     # but fall back to super-admin.conf for initial bootstrap.
     K8S_CONFIG="/etc/kubernetes/admin.conf"
     if [[ ! -f "$K8S_CONFIG" ]]; then
@@ -254,7 +255,7 @@ in
             imagefs.available: "15%"
         '';
       }
-      // (lib.optionalAttrs isClusterEnabled ({
+      // (lib.optionalAttrs isClusterEnabled {
         "kubernetes/kubelet/config.d/10-config.conf".text = ''
           kind: KubeletConfiguration
           apiVersion: kubelet.config.k8s.io/v1beta1
@@ -314,7 +315,7 @@ in
               unsafeSkipCAVerification: true
               apiServerEndpoint: "${apiserverVip}:6443"
         '';
-      }));
+      });
 
       systemPackages = [
         pkgs.dnsmasq
@@ -459,7 +460,7 @@ in
         enable = true;
         version = {
           kubeadm = kubeadmVersion;
-          kubelet = "v1.35.1";
+          kubelet = kubeletVersion;
         };
       };
       caCertificates.didactiklabs.enable = true;
