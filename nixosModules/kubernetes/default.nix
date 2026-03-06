@@ -14,6 +14,18 @@ let
       inherit version;
       src = source;
       doCheck = false;
+      installPhase =
+        if !builtins.elem "cmd/kubeadm" components then
+          builtins.replaceStrings
+            [
+              "installShellCompletion --cmd kubeadm"
+              "--bash <($out/bin/kubeadm completion bash)"
+              "--zsh <($out/bin/kubeadm completion zsh)"
+            ]
+            [ "" "" "" ]
+            oldAttrs.installPhase
+        else
+          oldAttrs.installPhase;
     });
 
   # Define kubelet and kubeadm using the common function with different versions and hashes
