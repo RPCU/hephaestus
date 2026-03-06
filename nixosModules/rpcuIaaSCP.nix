@@ -8,7 +8,7 @@ let
   cfg = config.customNixOSModules.rpcuIaaSCP;
 
   kubeadmVersion = "v1.35.2";
-  kubeletVersion = "v1.35.1";
+  kubeletVersion = "v1.35.2";
   apiserverVip = "10.0.0.5";
   primaryInterface = "eno1";
   kubevipVersion = "v1.0.4";
@@ -415,9 +415,12 @@ in
       linkConfig.Name = "enp3s0";
     };
 
-    systemd.services.kubelet.serviceConfig.Environment = lib.mkIf isClusterEnabled [
-      ''KUBELET_KUBECONFIG_ARGS="--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --node-ip=${cfg.cluster.privateAddress} --node-labels=openstack-control-plane=enabled,openstack-compute-node=enabled,openvswitch=enabled,linuxbridge=enabled"''
-    ];
+    systemd.services.kubelet.serviceConfig.Environment = lib.mkIf isClusterEnabled (
+      lib.mkForce [
+        ''KUBELET_KUBECONFIG_ARGS="--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --node-ip=${cfg.cluster.privateAddress} --node-labels=openstack-control-plane=enabled,openstack-compute-node=enabled,openvswitch=enabled,linuxbridge=enabled"''
+        ''KUBELET_CONFIG_ARGS="--config=/var/lib/kubelet/config.yaml --config-dir=/etc/kubernetes/kubelet/config.d"''
+      ]
+    );
 
     services.keepalived = lib.mkIf isClusterEnabled {
       enable = true;
