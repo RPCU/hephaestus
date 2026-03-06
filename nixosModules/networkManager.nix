@@ -67,11 +67,6 @@ in
               prefixLength = 24;
               mtu = 1400;
             }
-            {
-              vlanId = 4001;
-              privateAddress = "10.1.0.2";
-              prefixLength = 24;
-            }
           ]
         '';
       };

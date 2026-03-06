@@ -146,11 +146,11 @@ in
         type = lib.types.str;
         default = "";
       };
-      vlan4001Address = lib.mkOption {
+      primaryMacAddress = lib.mkOption {
         type = lib.types.str;
         default = "";
       };
-      macAddress = lib.mkOption {
+      openstackMacAddress = lib.mkOption {
         type = lib.types.str;
         default = "";
       };
@@ -407,8 +407,12 @@ in
 
     # Cluster-specific configs
     systemd.network.links."00-eno1" = lib.mkIf isClusterEnabled {
-      matchConfig.PermanentMACAddress = cfg.cluster.macAddress;
+      matchConfig.PermanentMACAddress = cfg.cluster.primaryMacAddress;
       linkConfig.Name = "eno1";
+    };
+    systemd.network.links."01-enp3s0" = lib.mkIf isClusterEnabled {
+      matchConfig.PermanentMACAddress = cfg.cluster.openstackMacAddress;
+      linkConfig.Name = "enp3s0";
     };
 
     systemd.services.kubelet.serviceConfig.Environment = lib.mkIf isClusterEnabled [
@@ -445,12 +449,6 @@ in
               vlanId = 4000;
               privateAddress = cfg.cluster.privateAddress;
               prefixLength = 24;
-              mtu = 1400;
-            }
-            {
-              vlanId = 4001;
-              privateAddress = cfg.cluster.vlan4001Address;
-              prefixLength = 16;
               mtu = 1400;
             }
           ];
