@@ -16,8 +16,8 @@ in
     enable = true;
     cluster = {
       privateAddress = "10.0.0.3";
-      vlan4001Address = "10.10.0.3";
-      macAddress = "30:9c:23:d3:51:37";
+      primaryMacAddress = "30:9c:23:d3:51:37";
+      openstackMacAddress = "6c:b3:11:5d:26:26";
       priority = 99;
       otherNodes = [
         "10.0.0.2" # lucy
