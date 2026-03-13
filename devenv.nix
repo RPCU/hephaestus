@@ -73,6 +73,7 @@
     echo "  build-iso       - Build bootable NixOS installation ISO image"
     echo "                    Output: ./result/iso/"
     echo "                    Variables: cloud, partition, disk"
+    echo "                    Available partitions: $(ls -1 installer/partitions/*.nix 2>/dev/null | xargs -n1 basename | sed 's/.nix//' | tr '\n' ',' | sed 's/,$//')"
     echo "                    Example: build-iso --arg cloud true --argstr partition default70G"
     echo ""
     echo "  build-qcow2     - Build compressed QCOW2 disk image for VM/cloud use"
