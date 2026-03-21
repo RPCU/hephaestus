@@ -39,6 +39,7 @@ in
       userImports = [ ./geass ];
       authorizedKeys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIARa6w3NaQ16Z21GOMceJXG81Ny56k/qTkymXQlnQgR7 aimenfaidi28@gmail.com"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAION/33Cxc+YGf5v0eDd/ZZnpRWt7UHFIVIp4mKm/+cMa aimenfaidi28@gmail.com"
       ];
     })
     (mkUser {

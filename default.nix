@@ -15,7 +15,14 @@ let
     modules = [
       ./installer/live-configuration.nix
     ];
-    specialArgs = { inherit disko partition cloud disk; };
+    specialArgs = {
+      inherit
+        disko
+        partition
+        cloud
+        disk
+        ;
+    };
   };
   nixosSystem = import (sources.nixpkgs + "/nixos") {
     configuration = ./profiles/${profile}/configuration.nix;

@@ -115,7 +115,7 @@ in
     ginx.enable = false;
     chrony = {
       enable = true;
-      vmconfig = true; 
+      vmconfig = true;
     };
   };
   imports = [

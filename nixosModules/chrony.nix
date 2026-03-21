@@ -11,14 +11,14 @@ in
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = ''Enable chrony and predefined optimised config.'';
+      description = "Enable chrony and predefined optimised config.";
     };
 
     # TODO implement best configuration for vms.
     vmconfig = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = ''Use predefined settings for vms'';
+      description = "Use predefined settings for vms";
     };
   };
 
@@ -29,7 +29,7 @@ in
     services.chrony = {
       enable = true;
       enableRTCTrimming = true;
-      
+
       # Using ntp pools
       servers = [
         "ntp1.hetzner.de"
