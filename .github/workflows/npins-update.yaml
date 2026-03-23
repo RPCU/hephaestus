@@ -18,7 +18,6 @@ jobs:
         run: |
           PINS=$(jq -c '[.pins | to_entries[] | select(.value.frozen != true) | .key]' npins/sources.json)
           echo "pins=$PINS" >> "$GITHUB_OUTPUT"
-
   npins-update:
     needs: get-pins
     runs-on: ubuntu-latest
@@ -63,10 +62,10 @@ jobs:
           body: "This PR updates the pinned source `${{ matrix.pin }}` using `npins update ${{ matrix.pin }}`."
           branch: "npins-update-${{ matrix.pin }}"
           delete-branch: true
-      - name: Enable Pull Request Automerge
-        if: steps.cpr.outputs.pull-request-operation == 'created'
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          merge-method: rebase
+    # - name: Enable Pull Request Automerge
+    #   if: steps.cpr.outputs.pull-request-operation == 'created'
+    #   uses: peter-evans/enable-pull-request-automerge@v3
+    #   with:
+    #     token: ${{ steps.app-token.outputs.token }}
+    #     pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+    #     merge-method: rebase
