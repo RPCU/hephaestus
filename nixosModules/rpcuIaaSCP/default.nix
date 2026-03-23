@@ -7,7 +7,7 @@
 let
   cfg = config.customNixOSModules.rpcuIaaSCP;
   vars = import ./vars.nix;
-  allNodeIps = [ cfg.cluster.privateAddress ] ++ cfg.cluster.otherNodes;
+  allNodeIps = [ cfg.privateAddress ] ++ cfg.cluster.otherNodes;
 
   inherit (vars)
     kubeadmVersion
@@ -34,14 +34,9 @@ let
     kubeletConfigDir
     ;
 
-  # Cluster enablement flag
-  isClusterEnabled = cfg.cluster.privateAddress != "";
-
-  # Shell snippet: apply node labels
-
   # Kubelet arguments as a single string
   kubeletNodeLabelsString = lib.concatStringsSep "," nodeLabels;
-  kubeletKubeconfigArgs = "--bootstrap-kubeconfig=${kubeletBootstrapConf} --kubeconfig=${kubeletConf} --node-ip=${cfg.cluster.privateAddress} --node-labels=${kubeletNodeLabelsString}";
+  kubeletKubeconfigArgs = "--bootstrap-kubeconfig=${kubeletBootstrapConf} --kubeconfig=${kubeletConf} --node-ip=${cfg.privateAddress} --node-labels=${kubeletNodeLabelsString}";
   kubeletConfigArgs = "--config=${kubeletConfigYaml} --config-dir=${kubeletConfigDir}";
   installKubevip = import ./scripts/installKubevip.nix {
     inherit
@@ -78,27 +73,27 @@ in
       description = "Enable the RPCU IaaS Control Plane module for Kubernetes cluster setup";
     };
 
+    privateAddress = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = "Private IP address for the node";
+    };
+
+    primaryMacAddress = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = "MAC address of the primary network interface (eno1)";
+    };
+
+    openstackMacAddress = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = "MAC address of the OpenStack network interface (enp3s0)";
+    };
+
     cluster = lib.mkOption {
       type = lib.types.submodule {
         options = {
-          privateAddress = lib.mkOption {
-            type = lib.types.str;
-            default = "";
-            description = "Private IP address for the cluster node (enables cluster mode when set)";
-          };
-
-          primaryMacAddress = lib.mkOption {
-            type = lib.types.str;
-            default = "";
-            description = "MAC address of the primary network interface (eno1)";
-          };
-
-          openstackMacAddress = lib.mkOption {
-            type = lib.types.str;
-            default = "";
-            description = "MAC address of the OpenStack network interface (enp3s0)";
-          };
-
           priority = lib.mkOption {
             type = lib.types.int;
             default = 0;
@@ -124,7 +119,6 @@ in
         cfg
         pkgs
         config
-        isClusterEnabled
         installKubevip
         initKubeadm
         joinCPKubeadm
@@ -144,13 +138,12 @@ in
         ;
     }
     // {
-      # Custom NixOS module configurations for cluster
-      customNixOSModules = lib.mkIf isClusterEnabled {
+      customNixOSModules = {
         # Secure sysctl settings
         sysctlSecure.enable = true;
 
         # Network management and virtual switching
-        networkManager = {
+        vlanConfiguration = {
           enable = true;
           vswitch = {
             enable = true;
@@ -158,13 +151,12 @@ in
             vlans = [
               {
                 vlanId = 4000;
-                inherit (cfg.cluster) privateAddress;
+                inherit (cfg) privateAddress;
                 prefixLength = 24;
               }
             ];
           };
         };
-        # Kubernetes deployment configuration
         kubernetes = {
           enable = true;
           version = {
@@ -172,9 +164,7 @@ in
             kubelet = kubeletVersion;
           };
         };
-        # Certificates and security
         caCertificates.didactiklabs.enable = true;
-        # Web server and time synchronization
         ginx.enable = true;
         chrony.enable = true;
       };

@@ -93,7 +93,7 @@ in
         lib
         ;
     })
-    (import ./nixosModules/networkManager.nix { inherit lib config pkgs; })
+    (import ./nixosModules/vlanConfiguration.nix { inherit lib config pkgs; })
     (import ./nixosModules/chrony.nix { inherit lib config pkgs; })
     (import "${sources.home-manager}/nixos")
     hostProfile
