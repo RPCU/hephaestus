@@ -43,8 +43,6 @@
       advertiseAddress: '${cfg.cluster.privateAddress}'
       bindPort: 6443
        nodeRegistration:
-         kubeletExtraArgs:
-           node-labels: "${lib.concatStringsSep "," nodeLabels}"
          taints: []
   '';
 }
