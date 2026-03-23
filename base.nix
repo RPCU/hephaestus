@@ -25,7 +25,6 @@ let
       sources
       ;
   };
-  ginx = import "${sources.nixbook}//customPkgs/ginx.nix" { inherit pkgs; };
 in
 {
   environment = {
