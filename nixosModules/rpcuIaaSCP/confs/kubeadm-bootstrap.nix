@@ -42,7 +42,9 @@
     localAPIEndpoint:
       advertiseAddress: '${cfg.cluster.privateAddress}'
       bindPort: 6443
-    nodeRegistration:
-      taints: []
+       nodeRegistration:
+         kubeletExtraArgs:
+           node-labels: "${lib.concatStringsSep "," nodeLabels}"
+         taints: []
   '';
 }
