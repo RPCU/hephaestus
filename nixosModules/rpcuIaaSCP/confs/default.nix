@@ -5,6 +5,7 @@
   kubeadmVersion,
   apiserverVip,
   podCidr,
+  nodeLabels,
 }:
 let
   auditPolicy = import ./audit-policy.nix { };
