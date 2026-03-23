@@ -11,6 +11,9 @@ let
       allowUnfree = true;
       allowUnfreePredicate = true;
     };
+    overlays = [
+      (import ./overlays/kubernetes.nix) # Apply the kubernetes overlay relative to base.nix
+    ];
   };
 
   hostProfile = import ./profiles/${hostname} {

@@ -6,51 +6,10 @@
 }:
 let
   cfg = config.customNixOSModules;
-  sources = import ../../npins;
+  k8sPackages = pkgs.getKubernetesPackages { inherit config; }; # Call the function from the overlay
 
-  kubernetesComponent =
-    components: source: version:
-    (pkgs.kubernetes.override { inherit components; }).overrideAttrs (oldAttrs: {
-      inherit version;
-      src = source;
-      doCheck = false;
-      installPhase =
-        if !builtins.elem "cmd/kubeadm" components then
-          builtins.replaceStrings
-            [
-              "installShellCompletion --cmd kubeadm"
-              "--bash <($out/bin/kubeadm completion bash)"
-              "--zsh <($out/bin/kubeadm completion zsh)"
-            ]
-            [ "" "" "" ]
-            oldAttrs.installPhase
-        else
-          oldAttrs.installPhase;
-    });
-
-  # Define kubelet and kubeadm using the common function with different versions and hashes
-  kubeadmSource = sources."kubeadm-${cfg.kubernetes.version.kubeadm}";
-  kubeletSource = sources."kubelet-${cfg.kubernetes.version.kubelet}";
-
-  # Optimized: Build both in one derivation if versions are identical
-  # This saves ~50% CPU and disk space during build.
-  kubernetesCombined =
-    if cfg.kubernetes.version.kubelet == cfg.kubernetes.version.kubeadm then
-      kubernetesComponent [ "cmd/kubelet" "cmd/kubeadm" ] kubeletSource cfg.kubernetes.version.kubelet
-    else
-      null;
-
-  kubeadm-bin =
-    if kubernetesCombined != null then
-      kubernetesCombined
-    else
-      kubernetesComponent [ "cmd/kubeadm" ] kubeadmSource cfg.kubernetes.version.kubeadm;
-
-  kubelet-bin =
-    if kubernetesCombined != null then
-      kubernetesCombined
-    else
-      kubernetesComponent [ "cmd/kubelet" ] kubeletSource cfg.kubernetes.version.kubelet;
+  kubeadm-bin = k8sPackages.kubernetes_kubeadm;
+  kubelet-bin = k8sPackages.kubernetes_kubelet;
   kubeadm-upgrade = pkgs.writeShellScriptBin "kubeadm-upgrade" ''
     set -euo pipefail
     if [ -f "/etc/kubernetes/admin.conf" ] && [ "$(${pkgs.kubectl}/bin/kubectl --kubeconfig=/etc/kubernetes/admin.conf get nodes | grep control-plane)" ]; then

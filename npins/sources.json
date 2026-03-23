@@ -103,6 +103,48 @@
       "revision": "c217913993d6c6f6805c3b1a3bda5e639adfde6d",
       "url": "https://github.com/NixOS/nixpkgs/archive/c217913993d6c6f6805c3b1a3bda5e639adfde6d.tar.gz",
       "hash": "sha256-D1PA3xQv/s4W3lnR9yJFSld8UOLr0a/cBWMQMXS+1Qg="
+    },
+    "nixpkgs-k8s-v1.35.0": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "80d901ec0377e19ac3f7bb8c035201e2e098cc97",
+      "url": "https://github.com/NixOS/nixpkgs/archive/80d901ec0377e19ac3f7bb8c035201e2e098cc97.tar.gz",
+      "hash": "sha256-mz05b1VyLWoTkNg8iJr3yXFJF7HDlwIUKI3ln39RacY=",
+      "frozen": true
+    },
+    "nixpkgs-k8s-v1.35.1": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "24f4544180242cd80bb2492ce6907243bc716e08",
+      "url": "https://github.com/NixOS/nixpkgs/archive/24f4544180242cd80bb2492ce6907243bc716e08.tar.gz",
+      "hash": "sha256-LmlmQWWeKJi5k0NmgU/yz2IxsRiY+butOoXt9MyFVhM=",
+      "frozen": true
+    },
+    "nixpkgs-k8s-v1.35.2": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "24f4544180242cd80bb2492ce6907243bc716e08",
+      "url": "https://github.com/NixOS/nixpkgs/archive/24f4544180242cd80bb2492ce6907243bc716e08.tar.gz",
+      "hash": "sha256-LmlmQWWeKJi5k0NmgU/yz2IxsRiY+butOoXt9MyFVhM=",
+      "frozen": true
     }
   },
   "version": 7
