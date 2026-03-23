@@ -3,7 +3,6 @@
   cfg,
   pkgs,
   config,
-  isClusterEnabled,
   installKubevip,
   initKubeadm,
   joinCPKubeadm,
@@ -37,11 +36,11 @@
             ;
         };
       in
-      importedConfs.baseConfigs // (lib.optionalAttrs isClusterEnabled importedConfs.clusterConfigs);
+      importedConfs.baseConfigs // (lib.optionalAttrs cfg.enable importedConfs.clusterConfigs);
     systemPackages = [
       pkgs.dnsmasq # DNS/DHCP server
     ]
-    ++ (lib.optionals isClusterEnabled [
+    ++ (lib.optionals cfg.enable [
       installKubevip
       initKubeadm
       joinCPKubeadm
@@ -124,31 +123,31 @@
   systemd = {
     network = {
       links = {
-        "00-eno1" = lib.mkIf isClusterEnabled {
-          matchConfig.PermanentMACAddress = cfg.cluster.primaryMacAddress;
+        "00-eno1" = lib.mkIf cfg.enable {
+          matchConfig.PermanentMACAddress = cfg.primaryMacAddress;
           linkConfig.Name = "eno1";
         };
-        "01-enp3s0" = lib.mkIf isClusterEnabled {
-          matchConfig.PermanentMACAddress = cfg.cluster.openstackMacAddress;
+        "01-enp3s0" = lib.mkIf cfg.enable {
+          matchConfig.PermanentMACAddress = cfg.openstackMacAddress;
           linkConfig.Name = "enp3s0";
         };
       };
     };
-    services.kubelet.serviceConfig.Environment = lib.mkIf isClusterEnabled (
+    services.kubelet.serviceConfig.Environment = lib.mkIf cfg.enable (
       lib.mkForce [
         ''KUBELET_KUBECONFIG_ARGS="${kubeletKubeconfigArgs}"''
         ''KUBELET_CONFIG_ARGS="${kubeletConfigArgs}"''
       ]
     );
   };
-  services.keepalived = lib.mkIf isClusterEnabled {
+  services.keepalived = lib.mkIf cfg.enable {
     enable = true;
     vrrpInstances."${vrrpInstanceName}" = {
       interface = vrrpInterfaceSubnet;
       state = vrrpState;
       virtualRouterId = vrrpRouterId;
       inherit (cfg.cluster) priority;
-      unicastSrcIp = cfg.cluster.privateAddress;
+      unicastSrcIp = cfg.privateAddress;
       unicastPeers = cfg.cluster.otherNodes;
       virtualIps = [
         {

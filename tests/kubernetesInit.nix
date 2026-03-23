@@ -14,7 +14,7 @@ pkgs.testers.runNixOSTest {
         imports = [
           ../nixosModules/kubernetes
           ../nixosModules/sysctl.nix
-          ../nixosModules/networkManager.nix
+          ../nixosModules/vlanConfiguration.nix
           ../tools.nix
         ];
         environment = {

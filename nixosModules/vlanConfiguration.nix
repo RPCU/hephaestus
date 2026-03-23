@@ -5,7 +5,7 @@
   ...
 }:
 let
-  cfg = config.customNixOSModules.networkManager;
+  cfg = config.customNixOSModules.vlanConfiguration;
   vlanInterfaceType = lib.types.submodule {
     options = {
       vlanId = lib.mkOption {
@@ -27,7 +27,7 @@ let
   };
 in
 {
-  options.customNixOSModules.networkManager = {
+  options.customNixOSModules.vlanConfiguration = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

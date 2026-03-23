@@ -41,7 +41,7 @@
     skipPhases:
       - addon/kube-proxy
     localAPIEndpoint:
-      advertiseAddress: '${cfg.cluster.privateAddress}'
+      advertiseAddress: '${cfg.privateAddress}'
       bindPort: 6443
        nodeRegistration:
          taints: []

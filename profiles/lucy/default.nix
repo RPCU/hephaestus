@@ -14,10 +14,10 @@ in
 {
   customNixOSModules.rpcuIaaSCP = {
     enable = true;
+    privateAddress = "10.0.0.2";
+    primaryMacAddress = "b4:2e:99:cd:02:76";
+    openstackMacAddress = "6c:b3:11:5d:26:7a";
     cluster = {
-      privateAddress = "10.0.0.2";
-      primaryMacAddress = "b4:2e:99:cd:02:76";
-      openstackMacAddress = "6c:b3:11:5d:26:7a";
       priority = 100;
       otherNodes = [
         "10.0.0.3" # makise

@@ -11,7 +11,7 @@
       taints: []
     controlPlane:
       localAPIEndpoint:
-        advertiseAddress: '${cfg.cluster.privateAddress}'
+        advertiseAddress: '${cfg.privateAddress}'
         bindPort: 6443
       certificateKey: '__CERTIFICATE_KEY__'
     discovery:
