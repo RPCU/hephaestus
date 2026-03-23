@@ -37,10 +37,6 @@ let
   isClusterEnabled = cfg.cluster.privateAddress != "";
 
   # Shell snippet: apply node labels
-  applyNodeLabels = ''
-    kubectl label ${lib.concatMapStringsSep " " (label: "--overwrite nodes --all ${label}") nodeLabels}
-    kubectl get no -o wide --show-labels
-  '';
 
   # Kubelet arguments as a single string
   kubeletNodeLabelsString = lib.concatStringsSep "," nodeLabels;
@@ -66,7 +62,6 @@ let
       pkgs
       k8sBootstrapYaml
       k8sAdminConf
-      applyNodeLabels
       ;
   };
 
@@ -76,7 +71,6 @@ let
       k8sJoinYamlTpl
       k8sJoinYaml
       k8sAdminConf
-      applyNodeLabels
       ;
   };
 in
@@ -168,6 +162,7 @@ in
               kubeadmVersion
               apiserverVip
               podCidr
+              nodeLabels
               ;
           };
         in
