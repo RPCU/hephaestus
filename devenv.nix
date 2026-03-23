@@ -61,6 +61,26 @@
       nix-build default.nix -A buildIso "$@" && \
       qemu-system-x86_64 -m 2048 -cdrom ./result/iso/*.iso
     '';
+    add-k8s-pin.exec = ''
+      if [ -z "$1" ] || [ -z "$2" ]; then
+        echo "Usage: add-k8s-nixpkgs-pin <K8S_VERSION> <NIXPKGS_REV>"
+        echo "Example: add-k8s-nixpkgs-pin v1.35.2 24f4544180242cd80bb2492ce6907243bc716e08"
+        exit 1
+      fi
+
+      K8S_VERSION="$1"
+      NIXPKGS_REV="$2"
+      NIXPKGS_URL="https://github.com/NixOS/nixpkgs/archive/$NIXPKGS_REV.tar.gz" # Construct URL from revision
+      PIN_NAME="nixpkgs-k8s-$K8S_VERSION"
+
+      echo "Adding pin for $PIN_NAME with URL $NIXPKGS_URL and revision $NIXPKGS_REV..."
+      ${pkgs.npins}/bin/npins add github NixOS nixpkgs \
+        --name "$PIN_NAME" \
+        --branch "master" --frozen \
+        --at "$NIXPKGS_REV"
+      echo "Nixpkgs pin for Kubernetes $K8S_VERSION added and frozen in npins."
+      echo "Remember to add corresponding 'kubeadm-$K8S_VERSION' and 'kubelet-$K8S_VERSION' entries if you haven't already."
+    '';
   };
 
   enterShell = ''
