@@ -19,6 +19,7 @@
   vrrpRouterId,
   virtualIpAddress,
   primaryInterface,
+  allNodeIps,
 }:
 {
   environment = {
@@ -32,6 +33,7 @@
             apiserverVip
             podCidr
             nodeLabels
+            allNodeIps
             ;
         };
       in

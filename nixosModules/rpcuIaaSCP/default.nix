@@ -7,6 +7,7 @@
 let
   cfg = config.customNixOSModules.rpcuIaaSCP;
   vars = import ./vars.nix;
+  allNodeIps = [ cfg.cluster.privateAddress ] ++ cfg.cluster.otherNodes;
 
   inherit (vars)
     kubeadmVersion
@@ -109,12 +110,6 @@ in
             default = [ ];
             description = "List of other control plane node IP addresses for cluster communication";
           };
-
-          allNodeIps = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [ ];
-            description = "List of all node IPs for API server certificate SANs";
-          };
         };
       };
       default = { };
@@ -145,6 +140,7 @@ in
         vrrpRouterId
         virtualIpAddress
         primaryInterface
+        allNodeIps
         ;
     }
     // {
@@ -164,7 +160,6 @@ in
                 vlanId = 4000;
                 inherit (cfg.cluster) privateAddress;
                 prefixLength = 24;
-                mtu = 1400;
               }
             ];
           };

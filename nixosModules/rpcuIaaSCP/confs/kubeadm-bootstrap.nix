@@ -5,6 +5,7 @@
   kubeadmVersion,
   apiserverVip,
   podCidr,
+  allNodeIps,
 }:
 {
   "kubernetes/kubeadm/bootstrap.yaml".text = ''
@@ -21,7 +22,7 @@
       certSANs:
         - 'openstack.rpcu.lan'
         - '${apiserverVip}'
-        ${lib.concatMapStringsSep "\n        " (ip: "- '${ip}'") cfg.cluster.allNodeIps}
+        ${lib.concatMapStringsSep "\n        " (ip: "- '${ip}'") allNodeIps}
       extraArgs:
         enable-admission-plugins: DefaultTolerationSeconds
         audit-policy-file: '/etc/kubernetes/audit/policy.yaml'
