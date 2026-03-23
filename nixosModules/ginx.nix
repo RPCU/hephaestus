@@ -11,10 +11,10 @@ let
   osupdate = pkgs.writeShellScriptBin "osupdate" ''
     set -euo pipefail
     echo last applied revisions: $(${pkgs.jq}/bin/jq .rev /etc/nixos/version)
-    echo applying revision: "$(${pkgs.git}/bin/git ls-remote https://github.com/rpcu/hephaestus HEAD | awk '{print $1}')"...
+    echo applying revision: "$(${pkgs.git}/bin/git ls-remote https://github.com/didactiklabs/nixbook HEAD | awk '{print $1}')"...
 
     echo Running ginx...
-    ${ginx}/bin/ginx --source https://github.com/rpcu/hephaestus -b main --now -- ${pkgs.colmena}/bin/colmena apply-local --sudo
+    ${ginx}/bin/ginx --source https://github.com/didactiklabs/nixbook -b main --now -- /run/wrappers/bin/sudo ${pkgs.colmena}/bin/colmena apply-local
   '';
 in
 {
@@ -28,6 +28,19 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
+    security = {
+      polkit = {
+        enable = true;
+        extraConfig = ''
+          polkit.addRule(function(action, subject) {
+            if (action.id == "org.freedesktop.systemd1.manage-units" &&
+                action.lookup("unit") == "ginx.service")) {
+              return polkit.Result.YES;
+            }
+          });
+        '';
+      };
+    };
     environment = {
       systemPackages = [
         pkgs.colmena
@@ -42,8 +55,22 @@ in
           enable = true;
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
-            ExecStart = "${pkgs.bash}/bin/bash -c '${ginx}/bin/ginx --source https://github.com/rpcu/hephaestus -b main -n 60 --exit-on-fail -- ${pkgs.colmena}/bin/colmena apply-local'";
-            Restart = "always";
+            Type = "oneshot";
+            ExecStart = "${pkgs.writeShellScript "nixos-upgrade-wrapper" ''
+              export NIXPKGS_ALLOW_UNFREE=1
+              export PATH=$PATH:${
+                lib.makeBinPath [
+                  pkgs.git
+                  pkgs.jq
+                  pkgs.colmena
+                  ginx
+                  osupdate
+                ]
+              }
+              exec osupdate
+            ''}";
+            StandardOutput = "journal";
+            StandardError = "journal";
           };
         };
       };
