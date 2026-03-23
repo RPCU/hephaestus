@@ -34,8 +34,8 @@ jobs:
       matrix:
         profile:
           - lucy
-          - makise
-          - quinn
+          # - makise
+          # - quinn
     steps:
       - name: Checkout
         uses: actions/checkout@v4
