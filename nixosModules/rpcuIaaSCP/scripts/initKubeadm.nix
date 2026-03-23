@@ -2,7 +2,6 @@
   pkgs,
   k8sBootstrapYaml,
   k8sAdminConf,
-  applyNodeLabels,
 }:
 pkgs.writeShellScriptBin "initKubeadm" ''
   set -euo pipefail
@@ -44,12 +43,6 @@ pkgs.writeShellScriptBin "initKubeadm" ''
   echo "--------------------------------------------------"
   echo "CLUSTER INITIALIZED SUCCESSFULLY"
   echo "--------------------------------------------------"
-  echo ""
-
-  # Apply node labels and show nodes
-  echo "---"
-  ${applyNodeLabels}
-  echo "---"
   echo ""
 
   # Display join command if credentials extracted successfully

@@ -19,10 +19,9 @@ let
       kubeadmVersion
       apiserverVip
       podCidr
-      nodeLabels
       ;
   };
-  kubeadmJoinTemplate = import ./kubeadm-join-template.nix { inherit apiserverVip cfg nodeLabels; };
+  kubeadmJoinTemplate = import ./kubeadm-join-template.nix { inherit apiserverVip cfg; };
 in
 {
   baseConfigs = auditPolicy // kubelet00Config;
