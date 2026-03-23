@@ -26,19 +26,10 @@ let
       ;
   };
   ginx = import "${sources.nixbook}//customPkgs/ginx.nix" { inherit pkgs; };
-  osupdate = pkgs.writeShellScriptBin "osupdate" ''
-    set -euo pipefail
-    echo last applied revisions: $(${pkgs.jq}/bin/jq .rev /etc/nixos/version)
-    echo applying revision: "$(${pkgs.git}/bin/git ls-remote https://github.com/rpcu/hephaestus HEAD | awk '{print $1}')"...
-
-    echo Running ginx...
-    ${ginx}/bin/ginx --source https://github.com/rpcu/hephaestus -b main --now -- ${pkgs.colmena}/bin/colmena apply-local --sudo
-  '';
 in
 {
   environment = {
     systemPackages = [
-      osupdate
       pkgs.efibootmgr
       pkgs.kitty
       pkgs.killall
