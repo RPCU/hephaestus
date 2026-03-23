@@ -33,10 +33,9 @@ jobs:
     strategy:
       matrix:
         profile:
-          - totoro
-          - anya
-          - nishinoya
-          - tanjiro
+          - lucy
+          - makise
+          - quinn
     steps:
       - name: Checkout
         uses: actions/checkout@v4
