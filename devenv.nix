@@ -65,6 +65,10 @@
     update-machines.exec = ''
       colmena apply --on @rpcu
     '';
+    show-k8s-pins.description = "Display already available Kubernetes nixpkgs pins via npins";
+    show-k8s-pins.exec = ''
+      ${pkgs.npins}/bin/npins show | grep 'nixpkgs-k8s-'
+    '';
     add-k8s-pin.description = "Pin a nixpkgs revision for a specific Kubernetes version via npins";
     add-k8s-pin.exec = ''
       if [ -z "$1" ] || [ -z "$2" ]; then
@@ -135,6 +139,9 @@
     echo ""
     echo "  update-machines - Deploy NixOS configuration to all RPCU cluster nodes via Colmena"
     echo "                    Example: update-machines"
+    echo ""
+    echo "  show-k8s-pins   - Display already available Kubernetes nixpkgs pins"
+    echo "                    Example: show-k8s-pins"
     echo ""
     echo "  add-k8s-pin     - Pin a nixpkgs revision for a specific Kubernetes version"
     echo "                    Usage: add-k8s-pin <K8S_VERSION> <NIXPKGS_REV>"
