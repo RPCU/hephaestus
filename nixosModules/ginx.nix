@@ -67,22 +67,10 @@ in
                   osupdate
                 ]
               }
-              exec osupdate
+              exec ginx --source https://github.com/RPCU/hephaestus -b main -n 60 -- colmena apply-local
             ''}";
             StandardOutput = "journal";
             StandardError = "journal";
-          };
-        };
-      };
-      timers = {
-        ginx-timer = {
-          enable = true;
-          description = "Timer to run myService every 5 minutes";
-          wantedBy = [ "timers.target" ];
-          timerConfig = {
-            OnUnitActiveSec = "5min";
-            Persistent = true;
-            Unit = "ginx.service";
           };
         };
       };
