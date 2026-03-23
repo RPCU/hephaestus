@@ -1,12 +1,13 @@
 # Kubeadm join configuration template (cluster-specific)
-{ apiserverVip, cfg }:
+{
+  apiserverVip,
+  cfg,
+}:
 {
   "kubernetes/kubeadm/join.yaml.tpl".text = ''
     apiVersion: kubeadm.k8s.io/v1beta3
     kind: JoinConfiguration
     nodeRegistration:
-      kubeletExtraArgs:
-        node-labels: "${lib.concatStringsSep "," nodeLabels}"
       taints: []
     controlPlane:
       localAPIEndpoint:
