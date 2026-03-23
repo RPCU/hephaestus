@@ -40,12 +40,9 @@ in
       services = {
         ginx = {
           enable = true;
-          path = [
-            pkgs.colmena
-          ];
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
-            ExecStart = "${pkgs.bash}/bin/bash -c '${ginx}/bin/ginx --source https://github.com/rpcu/hephaestus -b main -n 60 --exit-on-fail -- colmena apply-local'";
+            ExecStart = "${pkgs.bash}/bin/bash -c '${ginx}/bin/ginx --source https://github.com/rpcu/hephaestus -b main -n 60 --exit-on-fail -- ${pkgs.colmena}/bin/colmena apply-local'";
             Restart = "always";
           };
         };
