@@ -6,6 +6,7 @@
   apiserverVip,
   podCidr,
   nodeLabels,
+  allNodeIps,
 }:
 let
   auditPolicy = import ./audit-policy.nix { };
@@ -19,6 +20,7 @@ let
       kubeadmVersion
       apiserverVip
       podCidr
+      allNodeIps
       ;
   };
   kubeadmJoinTemplate = import ./kubeadm-join-template.nix { inherit apiserverVip cfg; };

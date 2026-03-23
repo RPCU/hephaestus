@@ -6,7 +6,6 @@
 }:
 let
   cfg = config.customNixOSModules.networkManager;
-
   vlanInterfaceType = lib.types.submodule {
     options = {
       vlanId = lib.mkOption {
@@ -14,22 +13,15 @@ let
         default = 4000;
         description = "VLAN ID (range 4000-4091 for Hetzner vSwitch)";
       };
-
-      privateAddress = lib.mkOption {
-        type = lib.types.str;
-        description = "Private IP address for the VLAN interface (e.g., 10.0.0.1)";
-      };
-
       prefixLength = lib.mkOption {
         type = lib.types.int;
         default = 24;
         description = "Network prefix length";
       };
 
-      mtu = lib.mkOption {
-        type = lib.types.int;
-        default = 1400;
-        description = "MTU size for VLAN interface (recommended 1400 for Hetzner vSwitch)";
+      privateAddress = lib.mkOption {
+        type = lib.types.str;
+        description = "Private IP address for the VLAN interface (e.g., 10.0.0.1)";
       };
     };
   };
@@ -93,7 +85,7 @@ in
             name = "${cfg.vswitch.interface}.${toString vlan.vlanId}";
             value = {
               id = vlan.vlanId;
-              interface = cfg.vswitch.interface;
+              inherit (cfg.vswitch) interface;
             };
           }) cfg.vswitch.vlans
         );
@@ -105,10 +97,10 @@ in
               ipv4.addresses = [
                 {
                   address = vlan.privateAddress;
-                  prefixLength = vlan.prefixLength;
+                  inherit (vlan) prefixLength;
                 }
               ];
-              mtu = vlan.mtu;
+              mtu = 1400;
             };
           }) cfg.vswitch.vlans
         );
