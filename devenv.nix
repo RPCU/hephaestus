@@ -61,6 +61,10 @@
       nix-build default.nix -A buildIso "$@" && \
       qemu-system-x86_64 -m 2048 -cdrom ./result/iso/*.iso
     '';
+    update-machines.description = "Deploy NixOS configuration to all RPCU cluster nodes via Colmena";
+    update-machines.exec = ''
+      colmena apply --on @rpcu
+    '';
     add-k8s-pin.description = "Pin a nixpkgs revision for a specific Kubernetes version via npins";
     add-k8s-pin.exec = ''
       if [ -z "$1" ] || [ -z "$2" ]; then
@@ -128,6 +132,9 @@
     echo "  test-iso        - Build ISO and boot it in QEMU (2GB RAM)"
     echo "                    Variables: cloud, partition, disk"
     echo "                    Example: test-iso --arg cloud true"
+    echo ""
+    echo "  update-machines - Deploy NixOS configuration to all RPCU cluster nodes via Colmena"
+    echo "                    Example: update-machines"
     echo ""
     echo "  add-k8s-pin     - Pin a nixpkgs revision for a specific Kubernetes version"
     echo "                    Usage: add-k8s-pin <K8S_VERSION> <NIXPKGS_REV>"
