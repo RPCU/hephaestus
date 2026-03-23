@@ -3,7 +3,6 @@
   k8sJoinYamlTpl,
   k8sJoinYaml,
   k8sAdminConf,
-  applyNodeLabels,
 }:
 pkgs.writeShellScriptBin "joinCPKubeadm" ''
   set -euo pipefail
@@ -44,7 +43,4 @@ pkgs.writeShellScriptBin "joinCPKubeadm" ''
   mkdir -p "$HOME/.kube"
   cp ${k8sAdminConf} "$HOME/.kube/config" 2>/dev/null
   sudo chown $(id -u):$(id -g) "$HOME/.kube/config"
-  echo "---"
-  ${applyNodeLabels}
-  echo "---"
 ''

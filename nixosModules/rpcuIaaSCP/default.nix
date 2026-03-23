@@ -42,9 +42,6 @@ let
   kubeletNodeLabelsString = lib.concatStringsSep "," nodeLabels;
   kubeletKubeconfigArgs = "--bootstrap-kubeconfig=${kubeletBootstrapConf} --kubeconfig=${kubeletConf} --node-ip=${cfg.cluster.privateAddress} --node-labels=${kubeletNodeLabelsString}";
   kubeletConfigArgs = "--config=${kubeletConfigYaml} --config-dir=${kubeletConfigDir}";
-
-  # ========== Scripts ==========
-
   installKubevip = import ./scripts/installKubevip.nix {
     inherit
       pkgs
@@ -56,7 +53,6 @@ let
       k8sManifestsDir
       ;
   };
-
   initKubeadm = import ./scripts/initKubeadm.nix {
     inherit
       pkgs
@@ -64,7 +60,6 @@ let
       k8sAdminConf
       ;
   };
-
   joinCPKubeadm = import ./scripts/joinCPKubeadm.nix {
     inherit
       pkgs
@@ -174,7 +169,6 @@ in
             ];
           };
         };
-
         # Kubernetes deployment configuration
         kubernetes = {
           enable = true;
@@ -183,10 +177,8 @@ in
             kubelet = kubeletVersion;
           };
         };
-
         # Certificates and security
         caCertificates.didactiklabs.enable = true;
-
         # Web server and time synchronization
         ginx.enable = true;
         chrony.enable = true;
