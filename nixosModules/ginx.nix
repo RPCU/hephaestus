@@ -55,7 +55,6 @@ in
           enable = true;
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
-            Type = "oneshot";
             ExecStart = "${pkgs.writeShellScript "nixos-upgrade-wrapper" ''
               export NIXPKGS_ALLOW_UNFREE=1
               export PATH=$PATH:${
