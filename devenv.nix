@@ -61,6 +61,7 @@
       nix-build default.nix -A buildIso "$@" && \
       qemu-system-x86_64 -m 2048 -cdrom ./result/iso/*.iso
     '';
+    add-k8s-pin.description = "Pin a nixpkgs revision for a specific Kubernetes version via npins";
     add-k8s-pin.exec = ''
       if [ -z "$1" ] || [ -z "$2" ]; then
         echo "Usage: add-k8s-nixpkgs-pin <K8S_VERSION> <NIXPKGS_REV>"
@@ -127,6 +128,10 @@
     echo "  test-iso        - Build ISO and boot it in QEMU (2GB RAM)"
     echo "                    Variables: cloud, partition, disk"
     echo "                    Example: test-iso --arg cloud true"
+    echo ""
+    echo "  add-k8s-pin     - Pin a nixpkgs revision for a specific Kubernetes version"
+    echo "                    Usage: add-k8s-pin <K8S_VERSION> <NIXPKGS_REV>"
+    echo "                    Example: add-k8s-pin v1.35.2 24f4544180242cd80bb2492ce6907243bc716e08"
     echo ""
   '';
 }
