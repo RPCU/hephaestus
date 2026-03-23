@@ -12,4 +12,4 @@ For complete documentation, installation guides, and configuration examples, vis
 
 ---
 
-*Built with ❤️ by the RPCU team*
+_Built with ❤️ by the RPCU team_
