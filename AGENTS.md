@@ -20,6 +20,7 @@ An "agent" in Hephaestus refers to any autonomous system service or component th
 **Purpose:** Manages container lifecycle, pod operations, and node coordination on Kubernetes nodes.
 
 **Features:**
+
 - Pod lifecycle management
 - Container runtime integration (containerd)
 - CNI networking plugin support
@@ -28,6 +29,7 @@ An "agent" in Hephaestus refers to any autonomous system service or component th
 - Node status reporting
 
 **Systemd Configuration:**
+
 - Always restart with 10-second delay
 - Integrated with containerd, CNI plugins, and system utilities
 - Listens on node's private IP address
@@ -43,6 +45,7 @@ An "agent" in Hephaestus refers to any autonomous system service or component th
 **Purpose:** Manages SSH keys and authentication for Git operations and remote deployments.
 
 **Configuration:**
+
 ```nix
 programs = {
   ssh.startAgent = true;
@@ -51,6 +54,7 @@ programs = {
 ```
 
 **Used for:**
+
 - Colmena deployments
 - Git operations
 - Remote access
@@ -67,6 +71,7 @@ programs = {
 **Purpose:** Enables host-to-guest communication for KVM/QEMU VMs.
 
 **Capabilities:**
+
 - VM lifecycle reporting
 - Hot-plug device support
 - Guest memory status
@@ -83,6 +88,7 @@ programs = {
 **Purpose:** Bootstraps cloud instances with network configuration and service initialization.
 
 **Configuration:**
+
 ```nix
 services.cloud-init = {
   enable = true;
@@ -91,6 +97,7 @@ services.cloud-init = {
 ```
 
 **Features:**
+
 - Network configuration automation
 - User/SSH key setup
 - Package installation
@@ -105,6 +112,7 @@ services.cloud-init = {
 
 **Type:** Network mesh/VPN agent  
 **Locations:**
+
 - `nixosModules/rpcuIaaSCP.nix` (Line 407)
 - `profiles/sunraku/default.nix` (Line 15)
 
@@ -113,6 +121,7 @@ services.cloud-init = {
 **Purpose:** Provides secure peer-to-peer network connectivity across infrastructure.
 
 **Features:**
+
 - WireGuard-based encryption
 - Point-to-point mesh networking
 - Centralized control, decentralized data plane
@@ -130,12 +139,14 @@ services.cloud-init = {
 **Purpose:** Manages declarative NixOS configuration across multiple nodes.
 
 **Managed Nodes:**
+
 - **lucy** - Control Plane Primary (IP: 10.0.0.2, Priority: 100, baremetal)
 - **makise** - Control Plane Secondary (IP: 10.0.0.3, Priority: 99, baremetal)
 - **quinn** - Control Plane Tertiary (IP: 10.0.0.4, Priority: 98, baremetal)
 - **sunraku** - Infrastructure VPS
 
 **Features:**
+
 - Build-on-target capability
 - Local deployment support (`colmena apply-local`)
 - Per-node target configuration
@@ -152,6 +163,7 @@ services.cloud-init = {
 **Purpose:** Watches remote Git repository and automatically deploys updates.
 
 **Configuration:**
+
 ```nix
 services.ginx = {
   enable = true;
@@ -165,6 +177,7 @@ timers.ginx-timer = {
 ```
 
 **Features:**
+
 - 60-second polling interval
 - 5-minute systemd timer trigger
 - Exit-on-failure mode
@@ -172,6 +185,7 @@ timers.ginx-timer = {
 - Integration with colmena for deployment
 
 **Deployment Flow:**
+
 ```
 Git Repository Update
   ↓ ginx polls (60s) / timer (5min)
@@ -193,6 +207,7 @@ Git Repository Update
 #### Associated Scripts:
 
 **a) initKubeadm** - Cluster Initialization
+
 - Location: `nixosModules/rpcuIaaSCP.nix` (Lines 102-156)
 - Deploys kube-vip for HA
 - Initializes cluster from bootstrap.yaml
@@ -201,6 +216,7 @@ Git Repository Update
 - Applies node labels
 
 **b) joinCPKubeadm** - Control Plane Node Join
+
 - Location: `nixosModules/rpcuIaaSCP.nix` (Lines 158-197)
 - Arguments: TOKEN CERTIFICATE_KEY
 - Populates join configuration from template
@@ -209,6 +225,7 @@ Git Repository Update
 - Applies node labels
 
 **c) kubeadm-upgrade** - Automated Cluster Upgrades
+
 - Location: `nixosModules/kubernetes/default.nix` (Lines 54-72)
 - Scheduled via 5-minute systemd timer
 - Detects version mismatches
@@ -226,11 +243,13 @@ Git Repository Update
 **Purpose:** Manages virtual IP for Kubernetes API server with failover.
 
 **Configuration:**
+
 - Virtual IP: 10.0.0.5:6443
 - Interface: VLAN 4000 on primary network
 - Features: ARP-based, leader election, service load balancing
 
 **Functions:**
+
 - API server endpoint failover
 - Control plane HA
 - Service LoadBalancer support
@@ -241,6 +260,7 @@ Git Repository Update
 ## Deployment Architecture
 
 ### Cluster Initialization Flow
+
 ```
 initKubeadm (user command)
   ↓ installKubevip
@@ -250,6 +270,7 @@ initKubeadm (user command)
 ```
 
 ### Node Joining Flow
+
 ```
 joinCPKubeadm TOKEN CERT_KEY
   ↓ installKubevip
@@ -259,6 +280,7 @@ joinCPKubeadm TOKEN CERT_KEY
 ```
 
 ### Continuous Deployment Flow
+
 ```
 Git Repository Update
   ↓ ginx polls (60s) / timer (5min)
@@ -268,6 +290,7 @@ Git Repository Update
 ```
 
 ### Cloud Instance Bootstrap Flow
+
 ```
 KVM/QEMU Launch
   ↓ qemu-guest-agent (VM state)
@@ -305,17 +328,17 @@ hive.nix (Colmena deployment framework)
 
 ## Summary
 
-| Agent | Type | Status | Scope | Purpose |
-|-------|------|--------|-------|---------|
-| **Kubelet** | K8s Node | ACTIVE | All k8s nodes | Pod/container lifecycle |
-| **SSH Agent** | System | ACTIVE | All nodes | Auth for deployments |
-| **QEMU Guest** | Cloud | ACTIVE | kaas profile | VM management |
-| **Cloud-Init** | Cloud Init | ACTIVE | kaas profile | Instance bootstrap |
-| **Netbird** | Network VPN | ACTIVE | RpcuIaaSCP + sunraku | Mesh VPN connectivity |
-| **Colmena** | Orchestration | ACTIVE | All (deployment) | Config management |
-| **Ginx** | GitOps | OPTIONAL | Configurable | Continuous deployment |
-| **Kubeadm** | K8s Bootstrap | ACTIVE | k8s nodes | Cluster init/join |
-| **Kube-VIP** | K8s HA | ACTIVE | Control plane | API server virtual IP |
+| Agent          | Type          | Status   | Scope                | Purpose                 |
+| -------------- | ------------- | -------- | -------------------- | ----------------------- |
+| **Kubelet**    | K8s Node      | ACTIVE   | All k8s nodes        | Pod/container lifecycle |
+| **SSH Agent**  | System        | ACTIVE   | All nodes            | Auth for deployments    |
+| **QEMU Guest** | Cloud         | ACTIVE   | kaas profile         | VM management           |
+| **Cloud-Init** | Cloud Init    | ACTIVE   | kaas profile         | Instance bootstrap      |
+| **Netbird**    | Network VPN   | ACTIVE   | RpcuIaaSCP + sunraku | Mesh VPN connectivity   |
+| **Colmena**    | Orchestration | ACTIVE   | All (deployment)     | Config management       |
+| **Ginx**       | GitOps        | OPTIONAL | Configurable         | Continuous deployment   |
+| **Kubeadm**    | K8s Bootstrap | ACTIVE   | k8s nodes            | Cluster init/join       |
+| **Kube-VIP**   | K8s HA        | ACTIVE   | Control plane        | API server virtual IP   |
 
 ---
 

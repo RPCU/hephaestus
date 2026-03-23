@@ -18,7 +18,10 @@
     shellcheck.enable = true;
     # execute example shell from Markdown files
     mdsh.enable = true;
-    nixfmt-rfc-style.enable = true;
+    treefmt = {
+      enable = true;
+      settings.fail-on-change = false;
+    };
   };
 
   difftastic.enable = true;
@@ -26,6 +29,18 @@
     enable = true;
     config.programs = {
       nixfmt.enable = true;
+      prettier = {
+        enable = true;
+        excludes = [
+          ".git"
+          ".devenv"
+          "assets/dms/plugins/**/translations.js"
+        ];
+        settings = {
+          proseWrap = "preserve";
+        };
+      };
+      shfmt.enable = true;
     };
   };
 
