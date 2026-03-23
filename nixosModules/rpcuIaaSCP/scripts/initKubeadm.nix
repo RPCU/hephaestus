@@ -2,7 +2,6 @@
   pkgs,
   k8sBootstrapYaml,
   k8sAdminConf,
-  configureKubectl,
   applyNodeLabels,
 }:
 pkgs.writeShellScriptBin "initKubeadm" ''
@@ -36,7 +35,10 @@ pkgs.writeShellScriptBin "initKubeadm" ''
   CERT_KEY=$(echo "$OUTPUT" | grep -oP '(?<=--certificate-key )[^ ]+' | head -n 1)
 
   # Configure kubectl access
-  ${configureKubectl}
+  echo "Configuring kubectl access..." >&2
+  mkdir -p "$HOME/.kube"
+  cp ${k8sAdminConf} "$HOME/.kube/config" 2>/dev/null
+  sudo chown $(id -u):$(id -g) "$HOME/.kube/config"
 
   # Display cluster initialization summary
   echo "--------------------------------------------------"

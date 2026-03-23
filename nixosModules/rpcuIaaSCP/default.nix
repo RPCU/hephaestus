@@ -75,6 +75,7 @@ let
       pkgs
       k8sJoinYamlTpl
       k8sJoinYaml
+      k8sAdminConf
       applyNodeLabels
       ;
   };
