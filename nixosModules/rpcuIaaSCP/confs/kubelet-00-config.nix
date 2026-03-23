@@ -11,18 +11,18 @@
     imageGCHighThresholdPercent: 85
     featureGates:
       SidecarContainers: true
-    cgroupDriver: systemd
-    systemReservedCgroup: /system.slice
-    enforceNodeAllocatable:
-      - pods
-      - system-reserved
-    systemReserved:
-      cpu: "1"
-      memory: "2Gi"
-      ephemeral-storage: "2Gi"
-    evictionHard:
-      memory.available: "500Mi"
-      nodefs.available: "10%"
-      imagefs.available: "15%"
+    # cgroupDriver: systemd
+    # systemReservedCgroup: /system.slice
+    # enforceNodeAllocatable:
+    #   - pods
+    #   - system-reserved
+    # systemReserved:
+    #   cpu: "1"
+    #   memory: "2Gi"
+    #   ephemeral-storage: "2Gi"
+    # evictionHard:
+    #   memory.available: "500Mi"
+    #   nodefs.available: "10%"
+    #   imagefs.available: "15%"
   '';
 }
