@@ -67,7 +67,7 @@ in
                   osupdate
                 ]
               }
-              exec ginx --source https://github.com/RPCU/hephaestus -b main -n 60 -- colmena apply-local
+              exec ginx --source https://github.com/RPCU/hephaestus -b main -n 60 --exit-on-fail -- colmena apply-local
             ''}";
             StandardOutput = "journal";
             StandardError = "journal";
