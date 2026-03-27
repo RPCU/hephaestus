@@ -25,9 +25,9 @@
       },
       "branch": "release-25.11",
       "submodules": false,
-      "revision": "cf9686ba26f5ef788226843bc31fda4cf72e373b",
-      "url": "https://github.com/nix-community/home-manager/archive/cf9686ba26f5ef788226843bc31fda4cf72e373b.tar.gz",
-      "hash": "sha256-dnHvv5EMUgTzGZmA+3diYjQU2O6BEpGLEOgJ1Qe9LaY="
+      "revision": "a0bb0d11514f92b639514220114ac8063c72d0a3",
+      "url": "https://github.com/nix-community/home-manager/archive/a0bb0d11514f92b639514220114ac8063c72d0a3.tar.gz",
+      "hash": "sha256-deix7yg3j6AhjMPnFDCmWB3f83LsajaaULP5HH2j34k="
     },
     "nixbook": {
       "type": "Git",
