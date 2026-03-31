@@ -86,6 +86,13 @@ jobs:
             - Source: [pkgs/by-name/ku/kubernetes/package.nix](https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/ku/kubernetes/package.nix)
           branch: "k8s-pin-${{ steps.k8s-version.outputs.version }}"
           delete-branch: true
+      - name: Enable Pull Request Automerge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: rebase
       - name: No update needed
         if: steps.check-pin.outputs.exists == 'true'
         run: |
