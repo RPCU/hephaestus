@@ -13,6 +13,7 @@ let
     };
     overlays = [
       (import ./overlays/kubernetes.nix) # Apply the kubernetes overlay relative to base.nix
+      (import ./overlays/nixbook-compat.nix) # Packages needed by nixbook modules
     ];
   };
 
