@@ -7,6 +7,7 @@ let
     };
     overlays = [
       (import ./overlays/kubernetes.nix) # Apply the kubernetes overlay
+      (import ./overlays/nixbook-compat.nix) # Packages needed by nixbook modules
     ];
   };
   createConfiguration = parent: {
