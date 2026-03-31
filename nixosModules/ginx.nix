@@ -53,6 +53,8 @@ in
       services = {
         ginx = {
           enable = true;
+          restartIfChanged = false;
+          stopIfChanged = false;
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
             ExecStart = "${pkgs.writeShellScript "nixos-upgrade-wrapper" ''

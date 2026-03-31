@@ -165,7 +165,7 @@ in
           };
         };
         caCertificates.didactiklabs.enable = true;
-        # ginx.enable = true;
+        ginx.enable = true;
         chrony.enable = true;
       };
     }
