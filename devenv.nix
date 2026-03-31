@@ -1,9 +1,14 @@
+let
+  sources = import ./npins;
+in
 {
   pkgs,
   lib,
   ...
 }:
 {
+  imports = [ "${sources.nixbook}/devenvModules/devenv.nix" ];
+
   packages = with pkgs; [
     go-task
     jq
@@ -13,36 +18,10 @@
     colmena
     npins
   ];
-  git-hooks.hooks = {
-    # lint shell scripts
-    shellcheck.enable = true;
-    # execute example shell from Markdown files
-    mdsh.enable = true;
-    treefmt = {
-      enable = true;
-      settings.fail-on-change = false;
-    };
-  };
 
-  difftastic.enable = true;
-  treefmt = {
-    enable = true;
-    config.programs = {
-      nixfmt.enable = true;
-      prettier = {
-        enable = true;
-        excludes = [
-          ".git"
-          ".devenv"
-          "assets/dms/plugins/**/translations.js"
-        ];
-        settings = {
-          proseWrap = "preserve";
-        };
-      };
-      shfmt.enable = true;
-    };
-  };
+  treefmt.config.programs.prettier.excludes = [
+    "assets/dms/plugins/**/translations.js"
+  ];
 
   env.PATH = lib.mkForce "$PWD/scripts:$PATH";
 
