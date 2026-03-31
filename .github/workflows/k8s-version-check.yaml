@@ -36,7 +36,7 @@ jobs:
 
           if jq -e ".pins[\"$PIN_NAME\"]" npins/sources.json > /dev/null 2>&1; then
             echo "Pin $PIN_NAME already exists"
-            echo "exists=true" >> "$GITHUB_OUTPUT
+            echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "Pin $PIN_NAME does not exist - will create"
             echo "exists=false" >> "$GITHUB_OUTPUT"
