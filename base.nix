@@ -169,6 +169,9 @@ in
       enable = true;
     };
   };
+  systemd.slices.system.sliceConfig = {
+    MemoryMax = "4G";
+  };
   security.sudo.wheelNeedsPassword = false;
   system.stateVersion = "24.05";
   # Containerd
