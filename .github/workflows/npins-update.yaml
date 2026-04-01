@@ -52,16 +52,15 @@ jobs:
         run: |
           REV=$(jq -r '.pins.nixpkgs.revision' npins/sources.json)
           sed -i "s|url: github:NixOS/nixpkgs/.*|url: github:NixOS/nixpkgs/${REV}|" devenv.yaml
-      - name: Create Pull Request
-        id: cpr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          commit-message: "chore(deps): update ${{ matrix.pin }}"
-          title: "chore(deps): update ${{ matrix.pin }}"
-          body: "This PR updates the pinned source `${{ matrix.pin }}` using `npins update ${{ matrix.pin }}`."
-          branch: "npins-update-${{ matrix.pin }}"
-          delete-branch: true
+      - name: Assign all org members as reviewers
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        run: |
+          MEMBERS=$(gh api orgs/didactiklabs/members --jq '[.[].login]' --paginate)
+          gh api "repos/${{ github.repository }}/pulls/${{ steps.cpr.outputs.pull-request-number }}/requested_reviewers" \
+            --method POST \
+            --field reviewers="$MEMBERS"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
     # - name: Enable Pull Request Automerge
     #   if: steps.cpr.outputs.pull-request-operation == 'created'
     #   uses: peter-evans/enable-pull-request-automerge@v3
