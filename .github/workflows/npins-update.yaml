@@ -66,6 +66,10 @@ jobs:
         if: steps.cpr.outputs.pull-request-operation == 'created'
         run: |
           MEMBERS=$(gh api orgs/RPCU/members --jq '[.[].login]' --paginate)
+          if [ "$MEMBERS" = "[]" ] || [ -z "$MEMBERS" ]; then
+            echo "No org members found, skipping reviewer assignment"
+            exit 0
+          fi
           gh api "repos/${{ github.repository }}/pulls/${{ steps.cpr.outputs.pull-request-number }}/requested_reviewers" \
             --method POST \
             --field reviewers="$MEMBERS"
