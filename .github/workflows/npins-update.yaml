@@ -52,6 +52,16 @@ jobs:
         run: |
           REV=$(jq -r '.pins.nixpkgs.revision' npins/sources.json)
           sed -i "s|url: github:NixOS/nixpkgs/.*|url: github:NixOS/nixpkgs/${REV}|" devenv.yaml
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: "chore(deps): update ${{ matrix.pin }}"
+          title: "chore(deps): update ${{ matrix.pin }}"
+          body: "This PR updates the pinned source `${{ matrix.pin }}` using `npins update ${{ matrix.pin }}`."
+          branch: "npins-update-${{ matrix.pin }}"
+          delete-branch: true
       - name: Assign all org members as reviewers
         if: steps.cpr.outputs.pull-request-operation == 'created'
         run: |
