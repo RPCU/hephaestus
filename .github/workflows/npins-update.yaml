@@ -55,7 +55,7 @@ jobs:
       - name: Assign all org members as reviewers
         if: steps.cpr.outputs.pull-request-operation == 'created'
         run: |
-          MEMBERS=$(gh api orgs/didactiklabs/members --jq '[.[].login]' --paginate)
+          MEMBERS=$(gh api orgs/RPCU/members --jq '[.[].login]' --paginate)
           gh api "repos/${{ github.repository }}/pulls/${{ steps.cpr.outputs.pull-request-number }}/requested_reviewers" \
             --method POST \
             --field reviewers="$MEMBERS"
