@@ -3,6 +3,7 @@
   partition ? "default70G",
   disk ? null,
   profile ? "kaas",
+  bootloader ? "systemd-boot",
   ...
 }:
 let
@@ -21,6 +22,7 @@ let
         partition
         cloud
         disk
+        bootloader
         ;
     };
   };
