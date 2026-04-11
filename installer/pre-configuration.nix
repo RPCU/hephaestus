@@ -6,6 +6,8 @@
   diskoCfg,
   cloud,
   bootloader ? "systemd-boot",
+  repoUrl ? "https://github.com/RPCU/hephaestus",
+  repoBranch ? "main",
   ...
 }:
 let
@@ -41,7 +43,7 @@ in
           }
                 echo Starting final configuration...
                 sleep 2
-                ginx --source https://github.com/rpcu/hephaestus -b main --now -- colmena apply-local --sudo
+                ginx --source ${repoUrl} -b ${repoBranch} --now -- colmena apply-local --sudo
                 sleep 10
                 sudo reboot
         '';
