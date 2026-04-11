@@ -77,10 +77,6 @@ in
             if bootloader == "grub" then
               {
                 grub.enable = true;
-                grub.efiSupport = true;
-                grub.efiInstallAsRemovable = true;
-                grub.device = "nodev";
-                efi.canTouchEfiVariables = false;
               }
             else
               {
