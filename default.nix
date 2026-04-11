@@ -4,6 +4,8 @@
   disk ? null,
   profile ? "kaas",
   bootloader ? "systemd-boot",
+  repoUrl ? "https://github.com/RPCU/hephaestus",
+  repoBranch ? "main",
   ...
 }:
 let
@@ -23,6 +25,8 @@ let
         cloud
         disk
         bootloader
+        repoUrl
+        repoBranch
         ;
     };
   };

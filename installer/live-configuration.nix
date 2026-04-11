@@ -7,6 +7,8 @@
   cloud,
   disk ? null,
   bootloader ? "systemd-boot",
+  repoUrl ? "https://github.com/RPCU/hephaestus",
+  repoBranch ? "main",
   lib,
   ...
 }:
@@ -21,6 +23,8 @@ let
       cloud
       config
       bootloader
+      repoUrl
+      repoBranch
       ;
   };
   isoType = if cloud == "true" then "-cloud" else "";
