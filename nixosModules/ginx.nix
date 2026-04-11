@@ -11,10 +11,10 @@ let
   osupdate = pkgs.writeShellScriptBin "osupdate" ''
     set -euo pipefail
     echo last applied revisions: $(${pkgs.jq}/bin/jq .rev /etc/nixos/version)
-    echo applying revision: "$(${pkgs.git}/bin/git ls-remote https://github.com/didactiklabs/nixbook HEAD | awk '{print $1}')"...
+    echo applying revision: "$(${pkgs.git}/bin/git ls-remote ${cfg.repositoryUrl} HEAD | awk '{print $1}')"...
 
     echo Running ginx...
-    ${ginx}/bin/ginx --source https://github.com/RPCU/hephaestus -b main --now -- /run/wrappers/bin/sudo ${pkgs.colmena}/bin/colmena apply-local
+    ${ginx}/bin/ginx --source ${cfg.repositoryUrl} -b ${cfg.repositoryBranch} --now -- /run/wrappers/bin/sudo ${pkgs.colmena}/bin/colmena apply-local
   '';
 in
 {
@@ -25,6 +25,16 @@ in
       description = ''
         Ginx is a cli tool that watch a remote repository and run an arbitrary command on changes/updates.
       '';
+    };
+    repositoryUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "https://github.com/RPCU/hephaestus";
+      description = "The repository URL for ginx to watch.";
+    };
+    repositoryBranch = lib.mkOption {
+      type = lib.types.str;
+      default = "main";
+      description = "The repository branch for ginx to watch.";
     };
   };
   config = lib.mkIf cfg.enable {
@@ -68,7 +78,7 @@ in
                   osupdate
                 ]
               }
-              exec ginx --source https://github.com/RPCU/hephaestus -b main -n 60 --exit-on-fail -- colmena apply-local
+              exec ginx --source ${cfg.repositoryUrl} -b ${cfg.repositoryBranch} -n 60 --exit-on-fail -- colmena apply-local
             ''}";
             StandardOutput = "journal";
             StandardError = "journal";
