@@ -2,28 +2,31 @@
   config,
   hostname,
   lib,
+  hephaestusPath ? ./.,
+  profilesPath ? hephaestusPath + "/profiles",
   ...
 }:
 let
-  sources = import ./npins;
+  sources = import (hephaestusPath + "/npins");
   pkgs = import sources.nixpkgs {
     config = {
       allowUnfree = true;
       allowUnfreePredicate = true;
     };
     overlays = [
-      (import ./overlays/kubernetes.nix) # Apply the kubernetes overlay relative to base.nix
-      (import ./overlays/nixbook-compat.nix) # Packages needed by nixbook modules
+      (import (hephaestusPath + "/overlays/kubernetes.nix")) # Apply the kubernetes overlay
+      (import (hephaestusPath + "/overlays/nixbook-compat.nix")) # Packages needed by nixbook modules
     ];
   };
 
-  hostProfile = import ./profiles/${hostname} {
+  hostProfile = import (profilesPath + "/${hostname}") {
     inherit
       lib
       config
       pkgs
       hostname
       sources
+      hephaestusPath
       ;
   };
 in
@@ -71,21 +74,21 @@ in
   };
   nixpkgs.config.allowUnfree = true;
   imports = [
-    ./tools.nix
+    (hephaestusPath + "/tools.nix")
     (import "${sources.nixbook}//nixosModules/caCertificates.nix")
-    ./nixosModules/ginx.nix
-    ./nixosModules/sysctl.nix
-    ./nixosModules/getRevision.nix
-    ./nixosModules/rpcuIaaSCP
-    (import ./nixosModules/kubernetes {
+    (hephaestusPath + "/nixosModules/ginx.nix")
+    (hephaestusPath + "/nixosModules/sysctl.nix")
+    (hephaestusPath + "/nixosModules/getRevision.nix")
+    (hephaestusPath + "/nixosModules/rpcuIaaSCP")
+    (import (hephaestusPath + "/nixosModules/kubernetes") {
       inherit
         pkgs
         config
         lib
         ;
     })
-    (import ./nixosModules/vlanConfiguration.nix { inherit lib config pkgs; })
-    (import ./nixosModules/chrony.nix { inherit lib config pkgs; })
+    (import (hephaestusPath + "/nixosModules/vlanConfiguration.nix") { inherit lib config pkgs; })
+    (import (hephaestusPath + "/nixosModules/chrony.nix") { inherit lib config pkgs; })
     (import "${sources.home-manager}/nixos")
     hostProfile
   ];
