@@ -80,7 +80,7 @@ in
                 grub.efiSupport = true;
                 grub.efiInstallAsRemovable = true;
                 grub.device = "nodev";
-                efi.canTouchEfiVariables = true;
+                efi.canTouchEfiVariables = false;
               }
             else
               {
