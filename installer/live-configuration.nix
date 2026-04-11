@@ -6,6 +6,7 @@
   partition,
   cloud,
   disk ? null,
+  bootloader ? "systemd-boot",
   lib,
   ...
 }:
@@ -19,12 +20,13 @@ let
       diskoCfg
       cloud
       config
+      bootloader
       ;
   };
   isoType = if cloud == "true" then "-cloud" else "";
 in
 {
-  image.fileName = lib.mkForce "${config.image.isoBaseName}-${config.system.nixos.label}-${pkgs.stdenv.hostPlatform.system}-${partition}${isoType}.iso";
+  image.fileName = lib.mkForce "${config.image.isoBaseName}-${config.system.nixos.label}-${pkgs.stdenv.hostPlatform.system}-${partition}${isoType}-${bootloader}.iso";
   imports = [
     "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix"
     (import ./installer.nix { inherit disko diskoCfg; })

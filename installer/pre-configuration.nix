@@ -5,6 +5,7 @@
   disko,
   diskoCfg,
   cloud,
+  bootloader ? "systemd-boot",
   ...
 }:
 let
@@ -70,10 +71,20 @@ in
         };
         networking.dhcpcd.enable = true;
         boot = {
-          loader = {
-            systemd-boot.enable = true;
-          };
-          loader.efi.canTouchEfiVariables = true;
+          loader =
+            if bootloader == "grub" then
+              {
+                grub.enable = true;
+                grub.efiSupport = true;
+                grub.efiInstallAsRemovable = true;
+                grub.device = "nodev";
+                efi.canTouchEfiVariables = true;
+              }
+            else
+              {
+                systemd-boot.enable = true;
+                efi.canTouchEfiVariables = true;
+              };
         };
 
         hardware = {
