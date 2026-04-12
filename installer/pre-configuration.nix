@@ -42,7 +42,7 @@ in
               ""
           }
                 echo Starting final configuration...
-                sleep 2
+                sleep 10
                 ginx --source ${repoUrl} -b ${repoBranch} --now -- colmena apply-local --sudo
                 sleep 10
                 sudo reboot
