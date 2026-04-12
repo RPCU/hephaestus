@@ -42,6 +42,8 @@ in
     hostName = "";
     useDHCP = lib.mkForce true; # Ensures this value takes precedence
   };
+  boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
+  boot.loader.grub.efiInstallAsRemovable = lib.mkForce false;
   environment.systemPackages = [
     pkgs.hwinfo
     pkgs.busybox
