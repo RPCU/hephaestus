@@ -105,6 +105,132 @@
       fsType = "ext4";
     };
   };
+  virtualisation.libvirtd.enable = true;
+  # Enable KVM (recommended)
+  virtualisation.libvirtd.qemu = {
+    package = pkgs.qemu_kvm;
+    runAsRoot = true;
+  };
+  users = {
+    groups = {
+      operator.gid = 2500000;
+      keystone.gid = 2500001;
+      ceilometer.gid = 2500002;
+      cinder.gid = 2500003;
+      glance.gid = 2500004;
+      gnocchi.gid = 2500005;
+      horizon.gid = 2500006;
+      neutron.gid = 2500007;
+      nova.gid = 2500008;
+      libvirt.gid = 2500009;
+      mariadb.gid = 2500010;
+      rabbitmq.gid = 2500011;
+      barbican.gid = 2500012;
+      tempest.gid = 2500014;
+      "ssl-terminator".gid = 2500015;
+      ovn.gid = 2500016;
+      placement.gid = 2500017;
+      designate.gid = 2500018;
+      octavia.gid = 2500019;
+    };
+    users = {
+      operator = {
+        uid = 2500000;
+        group = "operator";
+        isSystemUser = true;
+      };
+      keystone = {
+        uid = 2500001;
+        group = "keystone";
+        isSystemUser = true;
+      };
+      ceilometer = {
+        uid = 2500002;
+        group = "ceilometer";
+        isSystemUser = true;
+      };
+      cinder = {
+        uid = 2500003;
+        group = "cinder";
+        isSystemUser = true;
+      };
+      glance = {
+        uid = 2500004;
+        group = "glance";
+        isSystemUser = true;
+      };
+      gnocchi = {
+        uid = 2500005;
+        group = "gnocchi";
+        isSystemUser = true;
+      };
+      horizon = {
+        uid = 2500006;
+        group = "horizon";
+        isSystemUser = true;
+      };
+      neutron = {
+        uid = 2500007;
+        group = "neutron";
+        isSystemUser = true;
+      };
+      nova = {
+        uid = 2500008;
+        group = "nova";
+        isSystemUser = true;
+      };
+      libvirt = {
+        uid = 2500009;
+        group = "libvirt";
+        isSystemUser = true;
+      };
+      mariadb = {
+        uid = 2500010;
+        group = "mariadb";
+        isSystemUser = true;
+      };
+      rabbitmq = {
+        uid = 2500011;
+        group = "rabbitmq";
+        isSystemUser = true;
+      };
+      barbican = {
+        uid = 2500012;
+        group = "barbican";
+        isSystemUser = true;
+      };
+      tempest = {
+        uid = 2500014;
+        group = "tempest";
+        isSystemUser = true;
+      };
+      "ssl-terminator" = {
+        uid = 2500015;
+        group = "ssl-terminator";
+        isSystemUser = true;
+      };
+      ovn = {
+        uid = 2500016;
+        group = "ovn";
+        isSystemUser = true;
+      };
+      placement = {
+        uid = 2500017;
+        group = "placement";
+        isSystemUser = true;
+      };
+      designate = {
+        uid = 2500018;
+        group = "designate";
+        isSystemUser = true;
+      };
+      octavia = {
+        uid = 2500019;
+        group = "octavia";
+        isSystemUser = true;
+      };
+    };
+  };
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware = {
     # Intel microcode updates
