@@ -105,12 +105,12 @@
       fsType = "ext4";
     };
   };
-  virtualisation.libvirtd.enable = true;
-  # Enable KVM (recommended)
-  virtualisation.libvirtd.qemu = {
-    package = pkgs.qemu_kvm;
-    runAsRoot = true;
-  };
+  # virtualisation.libvirtd.enable = true;
+  # # Enable KVM (recommended)
+  # virtualisation.libvirtd.qemu = {
+  #   package = pkgs.qemu_kvm;
+  #   runAsRoot = true;
+  # };
   users = {
     groups = {
       operator.gid = 2500000;
