@@ -39,6 +39,20 @@ in
     "openstack-compute-node=enabled"
     "openvswitch=enabled"
     "linuxbridge=enabled"
+    "any.yaook.cloud/api=true"
+    "infra.yaook.cloud/any=true"
+    "operator.yaook.cloud/any=true"
+    "key-manager.yaook.cloud/barbican-any-service=true"
+    "block-storage.yaook.cloud/cinder-any-service=true"
+    "compute.yaook.cloud/nova-any-service=true"
+    "ceilometer.yaook.cloud/ceilometer-any-service=true"
+    "key-manager.yaook.cloud/barbican-keystone-listener=true"
+    "gnocchi.yaook.cloud/metricd=true"
+    "infra.yaook.cloud/caching=true"
+    "network.yaook.cloud/neutron-northd=true"
+    "network.yaook.cloud/neutron-ovn-agent=true"
+    "compute.yaook.cloud/hypervisor=true"
+    "compute.yaook.cloud/hypervisor-type=qemu"
   ];
 
   # Keepalived VRRP configuration
