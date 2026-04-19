@@ -164,7 +164,10 @@ in
             kubelet = kubeletVersion;
           };
         };
-        caCertificates.didactiklabs.enable = true;
+        caCertificates = {
+          didactiklabs.enable = true;
+          rpcu.enable = true;
+        };
         ginx.enable = true;
         chrony.enable = true;
       };
