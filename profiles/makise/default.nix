@@ -26,6 +26,17 @@ in
     };
   };
 
+  networking = {
+    interfaces.br-ex = {
+      ipv4.addresses = [
+        {
+          address = "172.24.0.2"; # for vm internet access
+          prefixLength = 24;
+        }
+      ];
+    };
+  };
+
   imports = [
     (import ../../users/rpcu {
       inherit
