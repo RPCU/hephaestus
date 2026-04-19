@@ -49,6 +49,11 @@
   networking = {
     useDHCP = lib.mkDefault true;
   };
+  networking.nat = {
+    enable = true;
+    externalInterface = "eno1";
+    internalIPs = [ "172.24.0.0/24" ]; # for internet access in vms
+  };
   services.netbird.enable = true;
   boot = {
     # Initial RAM disk configuration
