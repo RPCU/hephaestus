@@ -22,30 +22,41 @@ in
   };
   hardware.enableRedistributableFirmware = lib.mkDefault true;
   boot = {
+    tmp.cleanOnBoot = true;
     supportedFilesystems = [ "nfs" ];
     kernelParams = [
       "consoleblank=0"
       "console=ttyS0,115200n8"
-      "intel_iommu=on"
-      "vfio-pci.ids=8086:3e98"
     ];
     loader = {
-      systemd-boot.configurationLimit = 0;
-      timeout = 0;
-      grub = {
+      systemd-boot = {
         enable = true;
-        devices = [ "/dev/vda" ];
+        configurationLimit = 0;
       };
+      efi.canTouchEfiVariables = true;
+      grub.device = lib.mkDefault "/dev/vda";
     };
     growPartition = true;
   };
   networking = {
     hostName = lib.mkForce "";
   };
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/nixos";
-    autoResize = true;
-    fsType = "ext4";
+  fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-label/nixos";
+      autoResize = true;
+      fsType = "ext4";
+    };
+    "/boot" = {
+      device = "/dev/disk/by-label/ESP";
+      fsType = "vfat";
+      options = [
+        "fmask=0077"
+        "dmask=0077"
+        "nofail"
+        "x-systemd.device-timeout=5s"
+      ];
+    };
   };
   networking = {
     useDHCP = false;
@@ -95,7 +106,7 @@ in
             Name = "en*";
           };
           networkConfig = {
-            DHCP = "no";
+            DHCP = "yes";
           };
         };
       };
@@ -105,8 +116,8 @@ in
     kubernetes = {
       enable = true;
       version = {
-        kubeadm = "v1.35.2";
-        kubelet = "v1.35.2";
+        kubeadm = "1.35.4";
+        kubelet = "1.35.4";
       };
     };
     caCertificates = {

@@ -39,7 +39,7 @@ let
     diskSize = "auto";
     format = "qcow2-compressed";
     configFile = ./profiles/${profile}/configuration.nix;
-    partitionTableType = "hybrid";
+    partitionTableType = "efi";
     additionalSpace = "1G";
   };
   inherit (pkgs) lib;
