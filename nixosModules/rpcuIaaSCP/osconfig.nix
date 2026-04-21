@@ -52,7 +52,7 @@
   networking.nat = {
     enable = true;
     externalInterface = "eno1";
-    internalIPs = [ "172.24.0.0/24" ]; # for internet access in vms
+    internalIPs = [ "172.16.0.0/16" ]; # for internet access in vms
   };
   services.netbird.enable = true;
   boot = {

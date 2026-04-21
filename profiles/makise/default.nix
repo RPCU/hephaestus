@@ -30,8 +30,8 @@ in
     interfaces.br-ex = {
       ipv4.addresses = [
         {
-          address = "172.24.0.2"; # for vm internet access
-          prefixLength = 24;
+          address = "172.16.0.2"; # for vm internet access
+          prefixLength = 16;
         }
       ];
     };
