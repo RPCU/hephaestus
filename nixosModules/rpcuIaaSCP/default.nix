@@ -28,6 +28,10 @@ let
     vrrpRouterId
     vrrpState
     virtualIpAddress
+    brexVrrpInstanceName
+    brexVrrpRouterId
+    brexVrrpInterface
+    brexVirtualIpAddress
     kubeletBootstrapConf
     kubeletConf
     kubeletConfigYaml
@@ -133,6 +137,10 @@ in
         vrrpState
         vrrpRouterId
         virtualIpAddress
+        brexVrrpInstanceName
+        brexVrrpRouterId
+        brexVrrpInterface
+        brexVirtualIpAddress
         primaryInterface
         allNodeIps
         ;
