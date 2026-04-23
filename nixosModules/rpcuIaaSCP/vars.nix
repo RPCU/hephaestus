@@ -62,6 +62,12 @@ in
   vrrpState = "BACKUP";
   virtualIpAddress = "178.63.143.219/32";
 
+  # Keepalived VRRP configuration for br-ex VIP (VM internet gateway)
+  brexVrrpInstanceName = "VI_2";
+  brexVrrpRouterId = 52;
+  brexVrrpInterface = "br-ex";
+  brexVirtualIpAddress = "172.16.0.254/16";
+
   # Kubelet configuration paths
   kubeletBootstrapConf = "${k8sEtcDir}/bootstrap-kubelet.conf";
   kubeletConf = "${k8sEtcDir}/kubelet.conf";

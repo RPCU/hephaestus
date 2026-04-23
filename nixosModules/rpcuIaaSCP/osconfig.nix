@@ -17,6 +17,10 @@
   vrrpState,
   vrrpRouterId,
   virtualIpAddress,
+  brexVrrpInstanceName,
+  brexVrrpRouterId,
+  brexVrrpInterface,
+  brexVirtualIpAddress,
   primaryInterface,
   allNodeIps,
 }:
@@ -284,6 +288,20 @@
         {
           addr = virtualIpAddress;
           dev = primaryInterface;
+        }
+      ];
+    };
+    vrrpInstances."${brexVrrpInstanceName}" = {
+      interface = vrrpInterfaceSubnet;
+      state = vrrpState;
+      virtualRouterId = brexVrrpRouterId;
+      inherit (cfg.cluster) priority;
+      unicastSrcIp = cfg.privateAddress;
+      unicastPeers = cfg.cluster.otherNodes;
+      virtualIps = [
+        {
+          addr = brexVirtualIpAddress;
+          dev = brexVrrpInterface;
         }
       ];
     };
