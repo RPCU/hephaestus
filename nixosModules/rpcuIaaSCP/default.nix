@@ -171,6 +171,7 @@ in
             kubeadm = kubeadmVersion;
             kubelet = kubeletVersion;
           };
+          kubeadmUpgrade.enable = true;
         };
         caCertificates = {
           didactiklabs.enable = true;

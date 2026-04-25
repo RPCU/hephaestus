@@ -55,6 +55,15 @@ in
         '';
       };
     };
+    kubeadmUpgrade = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = ''
+          whether to enable the kubeadm-upgrade service and timer
+        '';
+      };
+    };
   };
   config = lib.mkIf cfg.kubernetes.enable {
     boot.kernel.sysctl = {
@@ -138,7 +147,7 @@ in
           after = [ "containerd.service" ];
           wants = [ "containerd.service" ];
         };
-        kubeadm-upgrade = {
+        kubeadm-upgrade = lib.mkIf cfg.kubernetes.kubeadmUpgrade.enable {
           enable = true;
           path = [
             "${kubeadm-bin}"
@@ -186,7 +195,7 @@ in
           wantedBy = [ "multi-user.target" ];
         };
       };
-      timers.kubeadm-upgrade-timer = {
+      timers.kubeadm-upgrade-timer = lib.mkIf cfg.kubernetes.kubeadmUpgrade.enable {
         enable = true;
         description = "Timer to run myService every 5 minutes";
         wantedBy = [ "timers.target" ];
