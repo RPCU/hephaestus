@@ -53,6 +53,10 @@ in
     "network.yaook.cloud/neutron-ovn-agent=true"
     "compute.yaook.cloud/hypervisor=true"
     "compute.yaook.cloud/hypervisor-type=qemu"
+    "designate.yaook.cloud/central=true"
+    "designate.yaook.cloud/mdns=true"
+    "designate.yaook.cloud/producer=true"
+    "designate.yaook.cloud/worker=true"
   ];
 
   # Keepalived VRRP configuration
