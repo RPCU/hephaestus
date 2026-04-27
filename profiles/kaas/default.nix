@@ -34,12 +34,8 @@ in
         configurationLimit = 0;
       };
       efi.canTouchEfiVariables = true;
-      grub.device = lib.mkDefault "/dev/vda";
     };
     growPartition = true;
-  };
-  networking = {
-    hostName = lib.mkForce "";
   };
   fileSystems = {
     "/" = {
@@ -79,13 +75,17 @@ in
     };
   };
 
+  system.nssModules = lib.mkForce [ ]; # required to effectively disable nscd
   services = {
+    nscd.enable = false; # avoids RR dns on all NIC IP for hostname local resolution
     qemuGuest = {
       enable = lib.mkForce true;
     };
     cloud-init = {
       enable = true;
       network.enable = true;
+      settings = {
+      };
     };
     resolved = {
       enable = true;
@@ -105,8 +105,14 @@ in
           matchConfig = {
             Name = "en*";
           };
+          linkConfig.RequiredForOnline = "routable";
           networkConfig = {
             DHCP = "yes";
+          };
+          dhcpV4Config = {
+            UseDNS = true;
+            UseDomains = true;
+            UseHostname = true;
           };
         };
       };
