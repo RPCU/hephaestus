@@ -105,7 +105,7 @@ in
     tmp.cleanOnBoot = true;
   };
   networking = {
-    hostName = "${hostname}"; # Define your hostname.
+    hostName = if hostname == "kaas" then "" else hostname; # kaas gets hostname at runtime via cloud-init
     firewall.enable = false;
   };
   # Set your time zone.
@@ -167,7 +167,6 @@ in
   };
   services = {
     resolved.enable = true;
-    # Disable the OpenSSH daemon.
     openssh = {
       enable = true;
     };
