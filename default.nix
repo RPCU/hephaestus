@@ -64,4 +64,19 @@ in
       cp -L ${buildQcow2}/nixos.qcow2 ./disk/${profile}.qcow2
     '';
   };
+
+  devShell = pkgs.mkShell {
+    packages = with pkgs; [
+      go-task
+      jq
+      yq-go
+      colmena
+      npins
+      sbomnix
+    ];
+    shellHook = ''
+      echo "Hephaestus development shell (minimal)"
+      echo "For the full environment, use: devenv shell"
+    '';
+  };
 }

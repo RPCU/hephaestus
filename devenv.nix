@@ -17,6 +17,8 @@ in
     docker
     colmena
     npins
+    grype
+    sbomnix
   ];
 
   treefmt.config.programs.prettier.excludes = [
@@ -43,6 +45,36 @@ in
     update-machines.description = "Deploy NixOS configuration to all RPCU cluster nodes via Colmena";
     update-machines.exec = ''
       colmena apply --on @rpcu
+    '';
+    build-sbom.description = "Generate a CycloneDX SBOM for all (or a specific) NixOS system profile using sbomnix";
+    build-sbom.exec = ''
+      if [ $# -eq 0 ]; then
+        for profile in $(ls profiles/); do
+          echo "=== SBOM: $profile ==="
+          toplevel=$(nix-build default.nix -A nixosSystem.config.system.build.toplevel --argstr profile "$profile" 2>/dev/null)
+          ${pkgs.sbomnix}/bin/sbomnix "$toplevel" --cdx sbom-$profile.json >/dev/null 2>&1
+          cat sbom-$profile.json
+        done
+      else
+        toplevel=$(nix-build default.nix -A nixosSystem.config.system.build.toplevel "$@" 2>/dev/null)
+        ${pkgs.sbomnix}/bin/sbomnix "$toplevel" --cdx sbom.json >/dev/null 2>&1
+        cat sbom.json
+      fi
+    '';
+    check-sbom.description = "Generate SBOM and scan for vulnerabilities with Grype for all (or a specific) profile using sbomnix";
+    check-sbom.exec = ''
+      if [ $# -eq 0 ]; then
+        for profile in $(ls profiles/); do
+          echo "=== Scanning: $profile ==="
+          toplevel=$(nix-build default.nix -A nixosSystem.config.system.build.toplevel --argstr profile "$profile" 2>/dev/null)
+          ${pkgs.sbomnix}/bin/sbomnix "$toplevel" --cdx sbom-$profile.json >/dev/null 2>&1
+          ${pkgs.grype}/bin/grype sbom:sbom-$profile.json
+        done
+      else
+        toplevel=$(nix-build default.nix -A nixosSystem.config.system.build.toplevel "$@" 2>/dev/null)
+        ${pkgs.sbomnix}/bin/sbomnix "$toplevel" --cdx sbom.json >/dev/null 2>&1
+        ${pkgs.grype}/bin/grype sbom:sbom.json
+      fi
     '';
     show-k8s-pins.description = "Display already available Kubernetes nixpkgs pins via npins";
     show-k8s-pins.exec = ''
@@ -87,6 +119,8 @@ in
           docker
           colmena
           npins
+          grype
+          sbomnix
         ]
       )
     )}
@@ -111,6 +145,19 @@ in
     echo "                    Variables: profile"
     echo "                    Available profiles: $PROFILES"
     echo "                    Example: build-oci-qcow2 --argstr profile kaas"
+    echo ""
+    echo "  build-sbom      - Generate a CycloneDX SBOM for NixOS system profiles"
+    echo "                    Output: stdout (JSON)"
+    echo "                    Default: all profiles"
+    echo "                    Available profiles: $PROFILES"
+    echo "                    Example: build-sbom"
+    echo "                    Example: build-sbom --argstr profile kaas"
+    echo ""
+    echo "  check-sbom      - Generate SBOM and scan for vulnerabilities with Grype"
+    echo "                    Default: all profiles"
+    echo "                    Available profiles: $PROFILES"
+    echo "                    Example: check-sbom"
+    echo "                    Example: check-sbom --argstr profile kaas"
     echo ""
     echo "  test-iso        - Build ISO and boot it in QEMU (2GB RAM)"
     echo "                    Variables: cloud, partition, disk"
