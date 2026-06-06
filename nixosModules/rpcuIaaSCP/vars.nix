@@ -3,7 +3,7 @@
 let
   # Kubernetes versioning
   kubeadmVersion = "1.36.1";
-  kubeletVersion = "v1.36.1";
+  kubeletVersion = "1.36.1";
   kubevipVersion = "v1.0.4";
 
   # Network configuration
