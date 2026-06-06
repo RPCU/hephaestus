@@ -59,9 +59,6 @@
     externalInterface = "eno1";
     internalIPs = [ "172.16.0.0/12" ]; # for internet access in vms
   };
-  systemd.slices.system.sliceConfig = {
-    MemoryMax = "10G";
-  };
   services.netbird.enable = true;
   boot = {
     # Initial RAM disk configuration
