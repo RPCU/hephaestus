@@ -87,6 +87,7 @@
     kernelModules = [
       "kvm-intel" # Intel KVM support
       "rbd" # Ceph RADOS block device
+      "nbd" # Network block device (Ceph CSI rbd-nbd mounter)
       "openvswitch" # Software switch for OpenStack
       "gre" # Generic Routing Encapsulation tunneling
       "vxlan" # VXLAN overlay networking
