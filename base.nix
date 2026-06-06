@@ -99,6 +99,11 @@ in
   boot = {
     kernelParams = [
       "intel_iommu=on"
+      "iommu=pt"
+      "default_hugepagesz=1G"
+      "hugepagesz=1G"
+      "hugepages=64"
+      "transparent_hugepage=never"
     ];
     loader.grub.enable = lib.mkDefault false;
     kernelPackages = pkgs.linuxPackages_latest;

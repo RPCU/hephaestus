@@ -2,7 +2,7 @@
 # No function arguments — this is a plain attribute set.
 let
   # Kubernetes versioning
-  kubeadmVersion = "v1.35.3";
+  kubeadmVersion = "1.36.1";
   kubeletVersion = "v1.35.3";
   kubevipVersion = "v1.0.4";
 
