@@ -59,7 +59,6 @@
     externalInterface = "eno1";
     internalIPs = [ "172.16.0.0/12" ]; # for internet access in vms
   };
-  services.netbird.enable = true;
   boot = {
     # Initial RAM disk configuration
     initrd = {
@@ -277,55 +276,58 @@
       ]
     );
   };
-  # DNS forwarder for OpenStack VMs to resolve K8s service names via CoreDNS.
-  # Listens on br-ex so VMs can use node IPs (172.16.0.{1,2,3}) or the
-  # keepalived VIP (172.16.0.254) as their DNS server.
-  # bind-dynamic allows dnsmasq to pick up the VIP address when keepalived
-  # assigns it, without requiring a restart.
-  services.dnsmasq = lib.mkIf cfg.enable {
-    enable = true;
-    resolveLocalQueries = false; # don't replace systemd-resolved on the host
-    settings = {
-      interface = "br-ex";
-      bind-dynamic = true; # track addresses that appear/disappear (keepalived VIP)
-      no-resolv = true; # don't read /etc/resolv.conf (points to systemd-resolved)
-      no-dhcp-interface = "br-ex"; # DNS only, no DHCP (Neutron handles that)
-      server = [
-        "/openstack.rpcu.vpn/10.0.0.241" # forward K8s DNS domain to CoreDNS ClusterIP
-        "1.1.1.1" # upstream for everything else
-        "8.8.8.8"
-      ];
+  services = {
+    netbird.enable = true;
+    # DNS forwarder for OpenStack VMs to resolve Designate entry through keepalived ip.
+    # Listens on br-ex so VMs can use node IPs (172.16.0.{1,2,3}) or the
+    # keepalived VIP (172.16.0.254) as their DNS server.
+    # bind-dynamic allows dnsmasq to pick up the VIP address when keepalived
+    # assigns it, without requiring a restart.
+    dnsmasq = lib.mkIf cfg.enable {
+      enable = true;
+      resolveLocalQueries = false; # don't replace systemd-resolved on the host
+      settings = {
+        interface = "br-ex";
+        bind-dynamic = true; # track addresses that appear/disappear (keepalived VIP)
+        no-resolv = true; # don't read /etc/resolv.conf (points to systemd-resolved)
+        no-dhcp-interface = "br-ex"; # DNS only, no DHCP (Neutron handles that)
+        server = [
+          "/openstack.rpcu.vpn/10.0.0.241" # forward K8s DNS domain to CoreDNS ClusterIP
+          "1.1.1.1" # upstream for everything else
+          "8.8.8.8"
+        ];
+      };
     };
-  };
-  services.keepalived = lib.mkIf cfg.enable {
-    enable = true;
-    vrrpInstances."${vrrpInstanceName}" = {
-      interface = vrrpInterfaceSubnet;
-      state = vrrpState;
-      virtualRouterId = vrrpRouterId;
-      inherit (cfg.cluster) priority;
-      unicastSrcIp = cfg.privateAddress;
-      unicastPeers = cfg.cluster.otherNodes;
-      virtualIps = [
-        {
-          addr = virtualIpAddress;
-          dev = primaryInterface;
-        }
-      ];
-    };
-    vrrpInstances."${brexVrrpInstanceName}" = {
-      interface = vrrpInterfaceSubnet;
-      state = vrrpState;
-      virtualRouterId = brexVrrpRouterId;
-      inherit (cfg.cluster) priority;
-      unicastSrcIp = cfg.privateAddress;
-      unicastPeers = cfg.cluster.otherNodes;
-      virtualIps = [
-        {
-          addr = brexVirtualIpAddress;
-          dev = brexVrrpInterface;
-        }
-      ];
+    keepalived = lib.mkIf cfg.enable {
+      enable = true;
+      vrrpInstances."${vrrpInstanceName}" = {
+        interface = vrrpInterfaceSubnet;
+        state = vrrpState;
+        virtualRouterId = vrrpRouterId;
+        inherit (cfg.cluster) priority;
+        unicastSrcIp = cfg.privateAddress;
+        unicastPeers = cfg.cluster.otherNodes;
+        virtualIps = [
+          {
+            addr = virtualIpAddress;
+            dev = primaryInterface;
+          }
+        ];
+      };
+      vrrpInstances."${brexVrrpInstanceName}" = {
+        interface = vrrpInterfaceSubnet;
+        state = vrrpState;
+        virtualRouterId = brexVrrpRouterId;
+        inherit (cfg.cluster) priority;
+        unicastSrcIp = cfg.privateAddress;
+        unicastPeers = cfg.cluster.otherNodes;
+        virtualIps = [
+          {
+            addr = brexVirtualIpAddress;
+            dev = brexVrrpInterface;
+          }
+        ];
+      };
     };
   };
 }
