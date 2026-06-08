@@ -353,3 +353,26 @@ hive.nix (Colmena deployment framework)
 7. **HA Setup:** 3-node control plane with virtual IP failover and leader election
 
 All agents operate within the NixOS declarative paradigm where configuration is reproducible, version-locked, and atomic.
+
+---
+
+## Network MTU (data plane)
+
+The OpenStack data NIC `enp3s0` (`nixosModules/rpcuIaaSCP/osconfig.nix`, in the
+`networking` block) is left at the **default 1500 MTU**. Do **not** set jumbo
+frames (9000) here.
+
+Rationale: the end-to-end path is not jumbo-clean. The Hetzner vSwitch VLAN
+`eno1.4000` is capped at **1400** (`nixosModules/vlanConfiguration.nix`), and
+`br-ex` / `eno1` (provider + public egress) default to **1500**. A jumbo (9000)
+`enp3s0` combined with Neutron advertising a 9000 tenant MTU caused oversized
+frames to black-hole the moment a flow hit a 1500/1400 hop — symptoms were
+flaky etcd (`127.0.0.1:2379` "operation was canceled") and intermittent TLS
+handshake timeouts pulling container images on tenant VMs (e.g. the CAPI mgmt
+cluster).
+
+The matching Neutron side (`global_physnet_mtu: 1400`, `path_mtu: 1400`,
+`physical_network_mtus: enp3s0:1400`) lives in the argus GitOps repo
+(`infrastructure/yaook/neutron.yaml`). With OVN geneve (38B overhead) this
+yields a ~1362 tenant MTU advertised to VMs via DHCP, which fits inside the
+1500 `enp3s0` underlay. If you change one side, change the other.
