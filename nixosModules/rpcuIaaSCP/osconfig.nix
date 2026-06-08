@@ -52,7 +52,6 @@
   };
   networking = {
     useDHCP = lib.mkDefault true;
-    interfaces.enp3s0.mtu = 9000;
   };
   networking.nat = {
     enable = true;
