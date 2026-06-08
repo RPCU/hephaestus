@@ -291,7 +291,8 @@
         no-resolv = true; # don't read /etc/resolv.conf (points to systemd-resolved)
         no-dhcp-interface = "br-ex"; # DNS only, no DHCP (Neutron handles that)
         server = [
-          "/openstack.rpcu.vpn/10.0.0.241" # forward K8s DNS domain to CoreDNS ClusterIP
+          "/rpcu.lan/10.0.0.241" # forward K8s DNS domain to CoreDNS ClusterIP
+          "/rpcu.vpn/127.0.0.53"
           "1.1.1.1" # upstream for everything else
           "8.8.8.8"
         ];
