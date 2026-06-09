@@ -23,11 +23,11 @@
         "owner": "nix-community",
         "repo": "home-manager"
       },
-      "branch": "release-25.11",
+      "branch": "release-26.05",
       "submodules": false,
-      "revision": "3ee51fbdac8c8bdfe1e7e1fcaba6520a563f394f",
-      "url": "https://github.com/nix-community/home-manager/archive/3ee51fbdac8c8bdfe1e7e1fcaba6520a563f394f.tar.gz",
-      "hash": "sha256-QOD/CNm196nCJRheux/URi4/HE66fthdOMqCJoPP1Y0="
+      "revision": "4eb4fec41674d5b059aa2eedf0f98453890546fa",
+      "url": "https://github.com/nix-community/home-manager/archive/4eb4fec41674d5b059aa2eedf0f98453890546fa.tar.gz",
+      "hash": "sha256-WU6SUrESuPiEXEUvX4D51AgWrXRJty+sLJBwBaDBGqE="
     },
     "nixbook": {
       "type": "Git",
@@ -38,9 +38,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "8ee8e3874d79f0ecf51ee43326b99b054cb6551d",
-      "url": "https://github.com/didactiklabs/nixbook/archive/8ee8e3874d79f0ecf51ee43326b99b054cb6551d.tar.gz",
-      "hash": "sha256-h9cCbFgYs9ezN/3l/l2YVFPg5NOGs2+utgiMSaV2kuE="
+      "revision": "dc53806ccdb1ed40fe44273297e0e43fb72ce301",
+      "url": "https://github.com/didactiklabs/nixbook/archive/dc53806ccdb1ed40fe44273297e0e43fb72ce301.tar.gz",
+      "hash": "sha256-5ch+YSaQK5NDdsgaUVMKh7pGxUfxNvueXArOX5NwfR4="
     },
     "nixpkgs": {
       "type": "Git",
@@ -49,11 +49,11 @@
         "owner": "NixOS",
         "repo": "nixpkgs"
       },
-      "branch": "nixos-25.11",
+      "branch": "nixos-26.05",
       "submodules": false,
-      "revision": "535f3e6942cb1cead3929c604320d3db54b542b9",
-      "url": "https://github.com/NixOS/nixpkgs/archive/535f3e6942cb1cead3929c604320d3db54b542b9.tar.gz",
-      "hash": "sha256-2v9lT4ya59Lh1FqPeLnz1MoX9y/wz2huqfe9RtQZITk="
+      "revision": "bd0ff2d3eac24699c3664d5966b9ef36f388e2ca",
+      "url": "https://github.com/NixOS/nixpkgs/archive/bd0ff2d3eac24699c3664d5966b9ef36f388e2ca.tar.gz",
+      "hash": "sha256-q8yYEC5f1mFlQO9RGna4LTc9QrcvWunX6FYp83munkQ="
     },
     "nixpkgs-k8s-1.35.3": {
       "type": "Git",
