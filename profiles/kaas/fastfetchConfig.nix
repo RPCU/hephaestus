@@ -9,8 +9,8 @@ let
   logo =
     let
       image = pkgs.fetchurl {
-        url = "https://i.imgur.com/1MZnT8y.jpeg";
-        sha256 = "sha256-+gr8JP0lzqwRoL0Jqt5onGIBp+G0E+XHtjfQSPHvNdw=";
+        url = "https://cdna.artstation.com/p/assets/images/images/073/622/688/large/danna-ottino-cassiopeia.jpg?1710104097";
+        sha256 = "sha256-Z1ojQa6d8G/eDZ2D38un7rDqf94ETYEy1TKEuSKU+co=";
       };
     in
     "${image}";
