@@ -1,6 +1,6 @@
 {
   cloud ? "false",
-  partition ? "default70G",
+  partition ? "root",
   disk ? null,
   profile ? "kaas",
   bootloader ? "systemd-boot",
