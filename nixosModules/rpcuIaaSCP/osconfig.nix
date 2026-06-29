@@ -23,6 +23,7 @@
   brexVirtualIpAddress,
   primaryInterface,
   allNodeIps,
+  publicVipAddr,
 }:
 {
   environment = {
@@ -57,7 +58,41 @@
     enable = true;
     externalInterface = "eno1";
     internalIPs = [ "172.16.0.0/12" ]; # for internet access in vms
-  };
+  }
+  # Route external HTTP(S) ingress hitting the public failover VIP into a tenant
+  # cluster's Octavia LoadBalancer VIP. The rule lives on all three nodes but
+  # only fires on the VRRP master (the only node that actually holds the public
+  # VIP and the path into the 172.16.0.0/16 Octavia network), so it follows
+  # keepalived failover automatically.
+  // lib.optionalAttrs (cfg.enable && cfg.publicIngress.enable) (
+    let
+      vip = publicVipAddr; # public VIP, /32 stripped
+      target = cfg.publicIngress.targetVip; # tenant Octavia LB VIP
+      ports = cfg.publicIngress.ports;
+      mkDnat = port: ''
+        iptables -w -t nat -A PREROUTING -d ${vip}/32 -p tcp --dport ${toString port} -j DNAT --to-destination ${target}:${toString port}
+        iptables -w -t nat -A OUTPUT -d ${vip}/32 -p tcp --dport ${toString port} -j DNAT --to-destination ${target}:${toString port}
+      '';
+      mkUndo = port: ''
+        iptables -w -t nat -D PREROUTING -d ${vip}/32 -p tcp --dport ${toString port} -j DNAT --to-destination ${target}:${toString port} || true
+        iptables -w -t nat -D OUTPUT -d ${vip}/32 -p tcp --dport ${toString port} -j DNAT --to-destination ${target}:${toString port} || true
+      '';
+    in
+    {
+      # Hairpin: replies from the Octavia VIP must come back through this node so
+      # it can un-DNAT, so masquerade the forwarded traffic onto the br-ex path.
+      extraCommands = lib.concatMapStrings mkDnat ports + ''
+        iptables -w -t nat -A POSTROUTING -d ${target}/32 -p tcp -m multiport --dports ${
+          lib.concatMapStringsSep "," toString ports
+        } -j MASQUERADE
+      '';
+      extraStopCommands = lib.concatMapStrings mkUndo ports + ''
+        iptables -w -t nat -D POSTROUTING -d ${target}/32 -p tcp -m multiport --dports ${
+          lib.concatMapStringsSep "," toString ports
+        } -j MASQUERADE || true
+      '';
+    }
+  );
   boot = {
     # Initial RAM disk configuration
     initrd = {
