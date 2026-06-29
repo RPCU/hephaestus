@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 mkdir -p output
-DISK_ARG=""
+disk_args=()
 if [[ -n "${3:-}" ]]; then
-  DISK_ARG="--argstr disk ${3}"
+  disk_args=(--argstr disk "${3}")
 fi
-cp $(nix-build default.nix -A buildIso --argstr partition "${1:-default60G}" --argstr cloud "${2:-false}" $DISK_ARG)/iso/* output/
+out=$(nix-build default.nix -A buildIso --argstr partition "${1:-default60G}" --argstr cloud "${2:-false}" "${disk_args[@]}")
+cp "$out"/iso/* output/
