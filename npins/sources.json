@@ -166,6 +166,19 @@
       "url": "https://github.com/NixOS/nixpkgs/archive/fdc7b8f7b30fdbedec91b71ed82f36e1637483ed.tar.gz",
       "hash": "sha256-a++tZ1RQsDb1I0NHrFwdGuRlR5TORvCEUksM459wKUA=",
       "frozen": true
+    },
+    "nixpkgs-unstable": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-unstable",
+      "submodules": false,
+      "revision": "e73de5be04e0eff4190a1432b946d469c794e7b4",
+      "url": "https://github.com/NixOS/nixpkgs/archive/e73de5be04e0eff4190a1432b946d469c794e7b4.tar.gz",
+      "hash": "sha256-pGvFkM8N0xEkIIXDe5YYfbEAvHrk4IxBrjB/x8OomhE="
     }
   },
   "version": 8

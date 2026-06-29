@@ -6,20 +6,27 @@ in
   lib,
   ...
 }:
+let
+  # The npins lock format is version 8, which requires npins >= 0.5.0.
+  # nixpkgs nixos-26.05 still ships 0.4.1 (only reads up to v7), so pull
+  # npins from the nixpkgs-unstable pin to match the committed lock format.
+  npins = (import sources.nixpkgs-unstable { localSystem = pkgs.stdenv.hostPlatform.system; }).npins;
+in
 {
   imports = [ "${sources.nixbook}/devenvModules/devenv.nix" ];
 
-  packages = with pkgs; [
-    go-task
-    jq
-    yq-go
-    qemu
-    docker
-    colmena
-    npins
-    grype
-    sbomnix
-  ];
+  packages =
+    (with pkgs; [
+      go-task
+      jq
+      yq-go
+      qemu
+      docker
+      colmena
+      grype
+      sbomnix
+    ])
+    ++ [ npins ];
 
   treefmt.config.programs.prettier.excludes = [
     "assets/dms/plugins/**/translations.js"
@@ -78,7 +85,7 @@ in
     '';
     show-k8s-pins.description = "Display already available Kubernetes nixpkgs pins via npins";
     show-k8s-pins.exec = ''
-      ${pkgs.npins}/bin/npins show | grep 'nixpkgs-k8s-'
+      ${npins}/bin/npins show | grep 'nixpkgs-k8s-'
     '';
     add-k8s-pin.description = "Pin a nixpkgs revision for a specific Kubernetes version via npins";
     add-k8s-pin.exec = ''
@@ -94,7 +101,7 @@ in
       PIN_NAME="nixpkgs-k8s-$K8S_VERSION"
 
       echo "Adding pin for $PIN_NAME with URL $NIXPKGS_URL and revision $NIXPKGS_REV..."
-      ${pkgs.npins}/bin/npins add github NixOS nixpkgs \
+      ${npins}/bin/npins add github NixOS nixpkgs \
         --name "$PIN_NAME" \
         --branch "master" --frozen \
         --at "$NIXPKGS_REV"
@@ -110,18 +117,17 @@ in
     echo "Available tools:"
     ${lib.concatStringsSep "\n    " (
       map (pkg: "echo \"  • ${pkg.name or pkg.pname or "unknown"} - ${pkg.meta.description or ""}\"") (
-        with pkgs;
-        [
+        (with pkgs; [
           go-task
           jq
           yq-go
           qemu
           docker
           colmena
-          npins
           grype
           sbomnix
-        ]
+        ])
+        ++ [ npins ]
       )
     )}
     echo ""
