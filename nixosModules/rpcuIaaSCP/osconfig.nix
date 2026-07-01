@@ -64,6 +64,12 @@
   # only fires on the VRRP master (the only node that actually holds the public
   # VIP and the path into the 172.16.0.0/16 Octavia network), so it follows
   # keepalived failover automatically.
+  #
+  # No explicit FORWARD accept is needed: the host firewall is disabled
+  # (base.nix `networking.firewall.enable = false`), so the filter FORWARD chain
+  # keeps its kernel-default ACCEPT policy, and `networking.nat.enable` turns on
+  # net.ipv4 forwarding. The DNAT below rewrites the destination in PREROUTING
+  # (external clients) and OUTPUT (traffic originating on the node itself).
   // lib.optionalAttrs (cfg.enable && cfg.publicIngress.enable) (
     let
       vip = publicVipAddr; # public VIP, /32 stripped
