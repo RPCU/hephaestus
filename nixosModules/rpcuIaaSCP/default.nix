@@ -133,12 +133,13 @@ in
         options = {
           enable = lib.mkOption {
             type = lib.types.bool;
-            default = false;
+            default = true;
             description = "Enable DNAT forwarding from the public VIP to a tenant Octavia LoadBalancer VIP";
           };
 
           targetVip = lib.mkOption {
             type = lib.types.str;
+            default = "172.16.255.10";
             example = "172.16.255.10";
             description = ''
               The tenant cluster's Octavia LoadBalancer VIP (a floating IP from
