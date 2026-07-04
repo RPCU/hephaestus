@@ -133,6 +133,14 @@ in
     # kubelet systemd unit is heavily inspired by official image-builder unit
     systemd = {
       services = {
+        # Containers inherit containerd's rlimits (CRI sets no per-container
+        # rlimit), and the NixOS containerd unit keeps the default soft
+        # nofile limit of 1024. On 2026-07-03 all 3 Ceph mons crash-looped
+        # (abort() in Processor::accept) when a reconnect storm after a node
+        # outage exhausted those 1024 fds. Match upstream containerd.service,
+        # which ships LimitNOFILE=infinity (systemd clamps to the kernel hard
+        # limit); we pin an explicit high value instead.
+        containerd.serviceConfig.LimitNOFILE = 1048576;
         cloud-final = {
           path = [
             "${kubeadm-bin}"
