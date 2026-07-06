@@ -120,6 +120,7 @@
       kernelModules = [
         "dm_snapshot"
         "dm-thin-pool"
+        "nfsv4"
       ];
       services.lvm.enable = true;
     };
