@@ -28,6 +28,14 @@ in
       "consoleblank=0"
       "console=ttyS0,115200n8"
     ];
+    # Disable NFSv4 directory delegations — NFS-Ganesha (V5.9 in ceph
+    # v19.2.3) replies OP_ILLEGAL instead of NOTSUPP to GET_DIR_DELEGATION,
+    # which Linux >= 6.11 kernels send on repeated directory access. The
+    # client maps that to EREMOTEIO, breaking non-root directory listings
+    # (Jellyfin/Radarr "Remote I/O error", July 2026 production incident).
+    # Re-evaluate when a ganesha release ships the NOTSUPP fix.
+    extraModprobeConfig = "options nfsv4 directory_delegations=0";
+    initrd.kernelModules = [ "nfsv4" ];
     loader = {
       systemd-boot = {
         enable = true;
