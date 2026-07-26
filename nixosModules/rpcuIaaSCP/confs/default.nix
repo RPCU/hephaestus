@@ -13,6 +13,7 @@ let
   kubelet00Config = import ./kubelet-00-config.nix { };
 
   kubelet10Config = import ./kubelet-10-config.nix { inherit cfg; };
+  resolvK8s = import ./resolv-k8s.nix { inherit cfg; };
   kubeadmBootstrap = import ./kubeadm-bootstrap.nix {
     inherit
       lib
@@ -27,5 +28,5 @@ let
 in
 {
   baseConfigs = auditPolicy // kubelet00Config;
-  clusterConfigs = kubelet10Config // kubeadmBootstrap // kubeadmJoinTemplate;
+  clusterConfigs = kubelet10Config // resolvK8s // kubeadmBootstrap // kubeadmJoinTemplate;
 }

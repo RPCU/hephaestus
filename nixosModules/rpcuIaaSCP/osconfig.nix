@@ -331,14 +331,31 @@
     # keepalived VIP (172.16.0.254) as their DNS server.
     # bind-dynamic allows dnsmasq to pick up the VIP address when keepalived
     # assigns it, without requiring a restart.
+    #
+    # It ALSO listens on the Kubernetes VLAN interface (${vrrpInterfaceSubnet},
+    # i.e. ${cfg.privateAddress}) so that the cluster's own pods can use it: the
+    # kubelet hands /etc/resolv-k8s.conf to pods, which points here, so CoreDNS
+    # can resolve the Designate `rpcu.lan` zone via the split rule below.
+    # Without this the cluster inherits Hetzner's public resolvers and NOTHING
+    # can resolve `*.rpcu.lan` — see confs/resolv-k8s.nix for the full story.
+    #
+    # This VLAN is the private Hetzner vSwitch segment, so binding :53 there
+    # does not expose an open resolver to the internet.
     dnsmasq = lib.mkIf cfg.enable {
       enable = true;
       resolveLocalQueries = false; # don't replace systemd-resolved on the host
       settings = {
-        interface = "br-ex";
+        interface = [
+          "br-ex"
+          vrrpInterfaceSubnet
+        ];
         bind-dynamic = true; # track addresses that appear/disappear (keepalived VIP)
         no-resolv = true; # don't read /etc/resolv.conf (points to systemd-resolved)
-        no-dhcp-interface = "br-ex"; # DNS only, no DHCP (Neutron handles that)
+        # DNS only, no DHCP (Neutron handles that on br-ex; kubeadm/Neutron own the VLAN)
+        no-dhcp-interface = [
+          "br-ex"
+          vrrpInterfaceSubnet
+        ];
         server = [
           "/rpcu.lan/10.0.0.241" # forward K8s DNS domain to CoreDNS ClusterIP
           "/rpcu.vpn/127.0.0.53"
