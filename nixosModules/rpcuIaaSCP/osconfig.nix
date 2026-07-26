@@ -347,14 +347,12 @@
       settings = {
         interface = [
           "br-ex"
-          vrrpInterfaceSubnet
         ];
         bind-dynamic = true; # track addresses that appear/disappear (keepalived VIP)
         no-resolv = true; # don't read /etc/resolv.conf (points to systemd-resolved)
         # DNS only, no DHCP (Neutron handles that on br-ex; kubeadm/Neutron own the VLAN)
         no-dhcp-interface = [
           "br-ex"
-          vrrpInterfaceSubnet
         ];
         server = [
           "/rpcu.lan/10.0.0.241" # forward K8s DNS domain to CoreDNS ClusterIP
