@@ -4,8 +4,9 @@
   cfg,
 }:
 {
+  # v1beta4 to match kubeadm-bootstrap.nix (v1beta3 is deprecated in k8s 1.36).
   "kubernetes/kubeadm/join.yaml.tpl".text = ''
-    apiVersion: kubeadm.k8s.io/v1beta3
+    apiVersion: kubeadm.k8s.io/v1beta4
     kind: JoinConfiguration
     nodeRegistration:
       taints: []
