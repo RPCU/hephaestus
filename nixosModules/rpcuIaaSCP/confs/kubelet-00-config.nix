@@ -4,7 +4,7 @@
   "kubernetes/kubelet/config.d/00-config.conf".text = ''
     kind: KubeletConfiguration
     apiVersion: kubelet.config.k8s.io/v1beta1
-    maxPods: 200
+    maxPods: 110
     rotateCertificates: true
     imageMaximumGCAge: 720h
     imageGCLowThresholdPercent: 70
