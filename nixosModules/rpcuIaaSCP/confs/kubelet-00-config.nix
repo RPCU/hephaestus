@@ -1,5 +1,8 @@
 # Common kubelet configuration (all nodes)
-{ }:
+{ cfg }:
+let
+  isLucy = cfg.privateAddress == "10.0.0.2";
+in
 {
   "kubernetes/kubelet/config.d/00-config.conf".text = ''
     kind: KubeletConfiguration
@@ -11,18 +14,17 @@
     imageGCHighThresholdPercent: 85
     featureGates:
       SidecarContainers: true
-    # cgroupDriver: systemd
-    # systemReservedCgroup: /system.slice
-    # enforceNodeAllocatable:
-    #   - pods
-    #   - system-reserved
-    # systemReserved:
-    #   cpu: "1"
-    #   memory: "4Gi"
-    #   ephemeral-storage: "2Gi"
-    # evictionHard:
-    #   memory.available: "500Mi"
-    #   nodefs.available: "10%"
-    #   imagefs.available: "15%"
+    cgroupDriver: systemd
+    systemReservedCgroup: /system.slice
+    enforceNodeAllocatable:
+      - pods
+    systemReserved:
+      cpu: "${if isLucy then "2" else "1"}"
+      memory: "${if isLucy then "20Gi" else "4Gi"}"
+      ephemeral-storage: "10Gi"
+    evictionHard:
+      memory.available: "1Gi"
+      nodefs.available: "10%"
+      imagefs.available: "15%"
   '';
 }
