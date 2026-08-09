@@ -154,6 +154,8 @@ in
             default = [
               80
               443
+              6443
+              8132
             ];
             description = "TCP ports to forward from the public VIP to the target Octavia VIP";
           };

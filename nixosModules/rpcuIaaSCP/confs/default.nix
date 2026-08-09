@@ -10,7 +10,7 @@
 }:
 let
   auditPolicy = import ./audit-policy.nix { };
-  kubelet00Config = import ./kubelet-00-config.nix { };
+  kubelet00Config = import ./kubelet-00-config.nix { inherit cfg; };
 
   kubelet10Config = import ./kubelet-10-config.nix { inherit cfg; };
   resolvK8s = import ./resolv-k8s.nix { inherit cfg; };
