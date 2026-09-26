@@ -59,6 +59,7 @@ let
           imports = lib.concatLists [
             mergedConfig.imports
             [
+              ./nixbook-hm-compat.nix
               (import "${sources.nixbook}//homeManagerModules/zshConfig.nix")
               (import "${sources.nixbook}//homeManagerModules/gitConfig.nix")
               (import "${sources.nixbook}//homeManagerModules/sshConfig.nix")

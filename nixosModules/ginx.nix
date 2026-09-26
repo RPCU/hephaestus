@@ -66,7 +66,13 @@ in
           restartIfChanged = false;
           stopIfChanged = false;
           wantedBy = [ "multi-user.target" ];
+          # ginx exits fatally on any clone/fetch error (e.g. DNS not up yet at boot),
+          # so order after the network and keep retrying instead of staying dead.
+          wants = [ "network-online.target" ];
+          after = [ "network-online.target" ];
           serviceConfig = {
+            Restart = "on-failure";
+            RestartSec = "120s";
             ExecStart = "${pkgs.writeShellScript "nixos-upgrade-wrapper" ''
               export NIXPKGS_ALLOW_UNFREE=1
               export PATH=$PATH:${
