@@ -190,6 +190,9 @@
       placement.gid = 2500017;
       designate.gid = 2500018;
       octavia.gid = 2500019;
+      # yaook nova-compute >= 4.1.222 runs `usermod -aG ovs-clients nova`; the pod
+      # mounts host /run, so NSS resolves via the host nscd and the group must exist here.
+      "ovs-clients".gid = 2500020;
     };
     users = {
       operator = {
