@@ -40,22 +40,6 @@
       extraArgs:
         - name: enable-admission-plugins
           value: DefaultTolerationSeconds
-        - name: audit-policy-file
-          value: '/etc/kubernetes/audit/policy.yaml'
-        - name: audit-log-path
-          value: '/var/log/kubernetes_audit.log'
-        - name: audit-log-maxsize
-          value: '100'
-        - name: audit-log-maxbackup
-          value: '10'
-        - name: audit-log-mode
-          value: 'batch'
-        - name: audit-log-batch-max-size
-          value: '5'
-      extraVolumes:
-        - name: auditpolicy
-          hostPath: /etc/kubernetes/audit/policy.yaml
-          mountPath: /etc/kubernetes/audit/policy.yaml
     ---
     apiVersion: kubeadm.k8s.io/v1beta4
     kind: InitConfiguration

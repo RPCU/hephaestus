@@ -9,7 +9,6 @@
   allNodeIps,
 }:
 let
-  auditPolicy = import ./audit-policy.nix { };
   kubelet00Config = import ./kubelet-00-config.nix { inherit cfg; };
 
   kubelet10Config = import ./kubelet-10-config.nix { inherit cfg; };
@@ -27,6 +26,6 @@ let
   kubeadmJoinTemplate = import ./kubeadm-join-template.nix { inherit apiserverVip cfg; };
 in
 {
-  baseConfigs = auditPolicy // kubelet00Config;
+  baseConfigs = kubelet00Config;
   clusterConfigs = kubelet10Config // resolvK8s // kubeadmBootstrap // kubeadmJoinTemplate;
 }
