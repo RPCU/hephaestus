@@ -6,6 +6,24 @@ Hephaestus is RPCU's NixOS-based operating system for reproducible, declarative 
 
 An "agent" in Hephaestus refers to any autonomous system service or component that manages infrastructure operations. These include Kubernetes services, VPN agents, deployment orchestrators, and cloud initialization services. All agents operate within the NixOS declarative paradigm where configuration is reproducible, version-locked, and atomic.
 
+## Git & Deploy Policy (for AI agents)
+
+AI agents MAY branch, commit, push, open/rebase PRs, merge to `main` and deploy
+(`colmena apply --on <host>`) when needed. **For a big change, wait for the
+user's approval before merging to `main`.**
+
+- Never commit on `main`: feature branch → Conventional Commit → push → PR →
+  rebase on `origin/main` → `gh pr merge <pr> --rebase` → delete the branch.
+- **Merging IS a deployment**: ginx on lucy/makise/quinn polls `main` and runs
+  `colmena apply-local`, so all three nodes pick it up within ~5 min. For
+  anything touching the kubelet, networking or reboots, roll it out host by
+  host from the branch first (`colmena apply --on lucy`, check, then makise,
+  then quinn) and merge afterwards so ginx has nothing left to change.
+- After a reboot or any OVS/OVN restart on a node, restart keepalived there.
+- Big change = kubelet/containerd/kernel/network/keepalived changes on the
+  baremetal nodes, anything needing a reboot, or anything with an unclear
+  rollback. When unsure, treat it as big.
+
 ---
 
 ## Agents
