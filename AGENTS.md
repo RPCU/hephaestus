@@ -52,6 +52,17 @@ user's approval before merging to `main`.**
 - Integrated with containerd, CNI plugins, and system utilities
 - Listens on node's private IP address
 
+**Hypervisor partition (rpcuIaaSCP nodes lucy/makise/quinn):** OpenStack VMs
+(qemu in `machine.slice`) share these hosts with pods but are invisible to the
+kubelet. `customNixOSModules.rpcuIaaSCP.hostPartition` (set per host in
+`profiles/<host>/default.nix`) carves the VM share out via kubelet
+`systemReserved` (cpu/memory) and sets `machine.slice` CPUWeight. The VM share
+MUST match the nova placement budget in argus
+`infrastructure/yaook/nova-placement-reservation.yaml`. Pod requests must fit
+the new allocatable BEFORE shrinking it (the kubelet re-admits pods on
+restart). Roll out one host at a time: `colmena apply --on <host>`; after any
+OVS/OVN restart or reboot, restart keepalived on the host.
+
 ---
 
 ### 2. SSH Agent - SSH Credential Management
