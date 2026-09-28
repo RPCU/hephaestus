@@ -117,6 +117,44 @@ in
       description = "Kubernetes cluster configuration options";
     };
 
+    hostPartition = lib.mkOption {
+      default = { };
+      description = ''
+        Static split of this hypervisor between the host, Kubernetes pods and
+        OpenStack VMs. The qemu processes run in machine.slice, OUTSIDE
+        kubepods, so the kubelet cannot see VM memory/CPU: everything the VMs
+        may use must be carved out of node allocatable via systemReserved.
+        The VM share here MUST match the nova placement budget for this host in
+        argus `infrastructure/yaook/nova-placement-reservation.yaml`.
+      '';
+      type = lib.types.submodule {
+        options = {
+          systemReservedCpu = lib.mkOption {
+            type = lib.types.str;
+            default = "1";
+            description = "kubelet systemReserved cpu = host + VM share (cores).";
+          };
+
+          systemReservedMemory = lib.mkOption {
+            type = lib.types.str;
+            default = "4Gi";
+            description = "kubelet systemReserved memory = host + VM share (incl. qemu overhead).";
+          };
+
+          vmCpuWeight = lib.mkOption {
+            type = lib.types.int;
+            default = 100;
+            description = ''
+              cgroup v2 cpu.weight of machine.slice (the VMs). kubepods gets
+              ~39 per allocatable core (kubelet shares→weight conversion), so
+              set this to ~39 × the physical cores the VMs should get under
+              full contention (systemd default 100 ≈ 2.5 cores).
+            '';
+          };
+        };
+      };
+    };
+
     publicIngress = lib.mkOption {
       default = { };
       description = ''

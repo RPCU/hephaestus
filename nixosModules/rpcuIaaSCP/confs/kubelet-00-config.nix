@@ -1,8 +1,5 @@
 # Common kubelet configuration (all nodes)
 { cfg }:
-let
-  isLucy = cfg.privateAddress == "10.0.0.2";
-in
 {
   "kubernetes/kubelet/config.d/00-config.conf".text = ''
     kind: KubeletConfiguration
@@ -18,9 +15,11 @@ in
     systemReservedCgroup: /system.slice
     enforceNodeAllocatable:
       - pods
+    # Host + OpenStack VM share (qemu lives in machine.slice, invisible to
+    # the scheduler) — see the rpcuIaaSCP `hostPartition` option.
     systemReserved:
-      cpu: "${if isLucy then "2" else "1"}"
-      memory: "${if isLucy then "20Gi" else "4Gi"}"
+      cpu: "${cfg.hostPartition.systemReservedCpu}"
+      memory: "${cfg.hostPartition.systemReservedMemory}"
       ephemeral-storage: "10Gi"
     evictionHard:
       memory.available: "1Gi"

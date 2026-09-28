@@ -320,6 +320,10 @@
         };
       };
     };
+    # OpenStack VMs (qemu scopes from libvirt/machined) share the CPU with
+    # kubepods; without this machine.slice keeps the default weight 100 and
+    # the VMs starve whenever the pods are busy.
+    slices.machine.sliceConfig.CPUWeight = cfg.hostPartition.vmCpuWeight;
     services.kubelet.serviceConfig.Environment = lib.mkIf cfg.enable (
       lib.mkForce [
         ''KUBELET_KUBECONFIG_ARGS="${kubeletKubeconfigArgs}"''
