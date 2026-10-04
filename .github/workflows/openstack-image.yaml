@@ -106,8 +106,8 @@ jobs:
         run: rm -f "$RUNNER_TEMP/clouds.yaml"
   chihiro:
     # Offer every version with an image in Glance in chihiro: opens (or
-    # updates) a PR on RPCU/hestia, merged by a person. Runs whether or not
-    # every publish job of this run succeeded.
+    # updates) a PR on RPCU/hestia and merges it. Runs whether or not every
+    # publish job of this run succeeded.
     needs: publish
     if: ${{ !cancelled() }}
     runs-on: self-hosted
@@ -160,6 +160,7 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/clouds.yaml"
       - name: Create Pull Request
+        id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
           path: hestia
@@ -177,3 +178,9 @@ jobs:
             New versions are added after the first `CHIHIRO_AVAILABLE_VERSIONS` entry, which stays the default for new clusters. Nothing is removed.
           branch: hephaestus-chihiro-versions
           delete-branch: true
+      - name: Merge Pull Request
+        # hestia has auto-merge disabled and main unprotected: merge directly
+        if: steps.cpr.outputs.pull-request-operation == 'created' || steps.cpr.outputs.pull-request-operation == 'updated'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" -R RPCU/hestia --rebase --delete-branch
