@@ -32,8 +32,10 @@ suffix="$release-$k8s"
 existing=$(openstack image list --property "hephaestus_fingerprint=$fingerprint" --status active -f value -c ID -c Name -c Visibility --long)
 if [ -n "$existing" ]; then
   echo "Up to date, image already in Glance: $existing"
-  # Images published before they were public
-  awk '$NF != "public" {print $1}' <<<"$existing" | xargs -r -n1 openstack image set --public
+  # Images published before they were public. Best effort: needs PATCH on
+  # images, which the CI app-cred's access rules may not allow.
+  awk '$NF != "public" {print $1}' <<<"$existing" | xargs -r -n1 openstack image set --public ||
+    echo "warning: could not make the existing image public" >&2
   exit 0
 fi
 
