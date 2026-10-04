@@ -33,6 +33,15 @@ let
   nixosSystem = import (sources.nixpkgs + "/nixos") {
     configuration = ./profiles/${profile}/configuration.nix;
   };
+  # Same system with the git metadata in /etc/nixos/version blanked out, so its
+  # toplevel path only changes when the OS itself changes (not on every commit).
+  # Used to decide whether a new Glance image is needed.
+  nixosSystemNoRev = import (sources.nixpkgs + "/nixos") {
+    configuration = {
+      imports = [ ./profiles/${profile}/configuration.nix ];
+      environment.etc."nixos/version".source = lib.mkForce (builtins.toFile "projectGit.json" "{}");
+    };
+  };
   buildQcow2 = import <nixpkgs/nixos/lib/make-disk-image.nix> {
     inherit lib pkgs;
     inherit (nixosSystem) config;
@@ -56,6 +65,16 @@ in
         }
       ];
     }).config.system.build.isoImage;
+  # Glance image naming for CAPO: hephaestus-<profile>[-<rev>]-<nixos release>-v<k8s>
+  # (e.g. hephaestus-kaas-26.05-v1.36.1). See scripts/uploadGlanceImage.
+  imageInfo = {
+    name = "hephaestus-${profile}";
+    release = nixosSystem.config.system.nixos.release;
+    kubernetesVersion = "v${nixosSystem.config.customNixOSModules.kubernetes.version.kubeadm}";
+    fingerprint = builtins.unsafeDiscardStringContext (
+      builtins.baseNameOf nixosSystemNoRev.config.system.build.toplevel.outPath
+    );
+  };
   ociQcow2 = pkgs.dockerTools.buildLayeredImage {
     name = "${profile}-${nixosSystem.config.customNixOSModules.kubernetes.version.kubeadm}";
     includeStorePaths = false;
