@@ -43,8 +43,20 @@ jobs:
             echo "pin_name=$PIN_NAME" >> "$GITHUB_OUTPUT"
             echo "nixpkgs_rev=$NIXPKGS_REV" >> "$GITHUB_OUTPUT"
           fi
+      - name: Check if kaas needs a bump
+        id: check-kaas
+        run: |
+          # kaas (the CAPO node image profile) follows the newest Kubernetes release
+          VERSION="${{ steps.k8s-version.outputs.version }}"
+          CURRENT=$(grep -oP 'kubeadm = "\K[^"]+' profiles/kaas/default.nix)
+          echo "kaas is on $CURRENT, latest is $VERSION"
+          if [ "$CURRENT" != "$VERSION" ] && [ "$(printf '%s\n' "$CURRENT" "$VERSION" | sort -V | tail -n1)" = "$VERSION" ]; then
+            echo "bump=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "bump=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Create GitHub App Token
-        if: steps.check-pin.outputs.exists == 'false'
+        if: steps.check-pin.outputs.exists == 'false' || steps.check-kaas.outputs.bump == 'true'
         id: app-token
         uses: actions/create-github-app-token@v1
         with:
@@ -71,16 +83,26 @@ jobs:
             --at "$NIXPKGS_REV"
 
           echo "Added pin $PIN_NAME at revision $NIXPKGS_REV"
+      - name: Bump kaas Kubernetes version
+        if: steps.check-kaas.outputs.bump == 'true'
+        run: |
+          VERSION="${{ steps.k8s-version.outputs.version }}"
+          sed -i -E "s/(kube(adm|let) = \")[^\"]+(\";)/\1$VERSION\3/" profiles/kaas/default.nix
+          git diff profiles/kaas/default.nix
       - name: Create Pull Request
-        if: steps.check-pin.outputs.exists == 'false'
+        if: steps.check-pin.outputs.exists == 'false' || steps.check-kaas.outputs.bump == 'true'
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ steps.app-token.outputs.token }}
-          commit-message: "chore(deps): add kubernetes pin for ${{ steps.k8s-version.outputs.version }}"
-          title: "chore(deps): add kubernetes pin for ${{ steps.k8s-version.outputs.version }}"
+          commit-message: "chore(deps): kubernetes ${{ steps.k8s-version.outputs.version }}"
+          title: "chore(deps): kubernetes ${{ steps.k8s-version.outputs.version }}"
           body: |
-            This PR adds a frozen npins pin for Kubernetes version `${{ steps.k8s-version.outputs.version }}`.
+            For Kubernetes `${{ steps.k8s-version.outputs.version }}`, as needed:
+            - adds a frozen npins pin `nixpkgs-k8s-${{ steps.k8s-version.outputs.version }}`
+            - bumps the `kaas` profile (CAPO node image) to it
+
+            Once merged, the Publish OpenStack Images workflow uploads the matching Glance images.
 
             - Nixpkgs revision: `${{ steps.check-pin.outputs.nixpkgs_rev }}`
             - Source: [pkgs/by-name/ku/kubernetes/package.nix](https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/ku/kubernetes/package.nix)
@@ -94,6 +116,6 @@ jobs:
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: rebase
       - name: No update needed
-        if: steps.check-pin.outputs.exists == 'true'
+        if: steps.check-pin.outputs.exists == 'true' && steps.check-kaas.outputs.bump == 'false'
         run: |
-          echo "Kubernetes version ${{ steps.k8s-version.outputs.version }} already has a pin - no action needed"
+          echo "Kubernetes version ${{ steps.k8s-version.outputs.version }} already has a pin and kaas is on it - no action needed"

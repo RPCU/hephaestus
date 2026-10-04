@@ -11,11 +11,16 @@
 #
 # Needs openstack credentials in the environment (OS_CLOUD + clouds.yaml, or
 # OS_* variables) and: nix-build, openstack, qemu-img, jq, git.
-# Usage: uploadGlanceImage [profile]   (default: kaas)
+# Usage: uploadGlanceImage [profile] [kubernetes version]
+#   profile defaults to kaas, the version to the profile's own (e.g. 1.37.1).
 set -euo pipefail
 profile="${1:-kaas}"
+nixargs=(--argstr profile "$profile")
+if [ -n "${2:-}" ]; then
+  nixargs+=(--argstr kubernetesVersion "$2")
+fi
 
-info=$(nix-instantiate --eval --strict --json --read-write-mode default.nix -A imageInfo --argstr profile "$profile")
+info=$(nix-instantiate --eval --strict --json --read-write-mode default.nix -A imageInfo "${nixargs[@]}")
 base=$(jq -r .name <<<"$info")
 release=$(jq -r .release <<<"$info")
 k8s=$(jq -r .kubernetesVersion <<<"$info")
@@ -40,7 +45,7 @@ else
 fi
 echo "Publishing $name (fingerprint $fingerprint)"
 
-out=$(nix-build default.nix -A buildQcow2 --argstr profile "$profile" --no-out-link)
+out=$(nix-build default.nix -A buildQcow2 "${nixargs[@]}" --no-out-link)
 
 mkdir -p output
 chmod +w output -R

@@ -6,6 +6,9 @@
   bootloader ? "systemd-boot",
   repoUrl ? "https://github.com/RPCU/hephaestus",
   repoBranch ? "main",
+  # Overrides the profile's customNixOSModules.kubernetes.version (kubeadm and
+  # kubelet), e.g. "1.37.1". Needs a matching nixpkgs-k8s-<version> npins pin.
+  kubernetesVersion ? null,
   ...
 }:
 let
@@ -30,15 +33,24 @@ let
         ;
     };
   };
+  profileModules = [
+    ./profiles/${profile}/configuration.nix
+  ]
+  ++ lib.optional (kubernetesVersion != null) {
+    customNixOSModules.kubernetes.version = lib.mapAttrs (_: lib.mkForce) {
+      kubeadm = lib.removePrefix "v" kubernetesVersion;
+      kubelet = lib.removePrefix "v" kubernetesVersion;
+    };
+  };
   nixosSystem = import (sources.nixpkgs + "/nixos") {
-    configuration = ./profiles/${profile}/configuration.nix;
+    configuration.imports = profileModules;
   };
   # Same system with the git metadata in /etc/nixos/version blanked out, so its
   # toplevel path only changes when the OS itself changes (not on every commit).
   # Used to decide whether a new Glance image is needed.
   nixosSystemNoRev = import (sources.nixpkgs + "/nixos") {
     configuration = {
-      imports = [ ./profiles/${profile}/configuration.nix ];
+      imports = profileModules;
       environment.etc."nixos/version".source = lib.mkForce (builtins.toFile "projectGit.json" "{}");
     };
   };
@@ -75,6 +87,22 @@ in
       builtins.baseNameOf nixosSystemNoRev.config.system.build.toplevel.outPath
     );
   };
+  # Kubernetes versions to publish Glance images for: the latest patch of the
+  # two newest minors that have a nixpkgs-k8s-<x.y.z> pin, newest first.
+  supportedKubernetesVersions =
+    let
+      versions = lib.sort (a: b: builtins.compareVersions a b > 0) (
+        lib.concatMap (
+          pin:
+          let
+            m = builtins.match "nixpkgs-k8s-([0-9]+\\.[0-9]+\\.[0-9]+)" pin;
+          in
+          lib.optional (m != null) (builtins.head m)
+        ) (builtins.attrNames sources)
+      );
+      minors = lib.take 2 (lib.unique (map lib.versions.majorMinor versions));
+    in
+    map (minor: lib.findFirst (v: lib.versions.majorMinor v == minor) null versions) minors;
   ociQcow2 = pkgs.dockerTools.buildLayeredImage {
     name = "${profile}-${nixosSystem.config.customNixOSModules.kubernetes.version.kubeadm}";
     includeStorePaths = false;

@@ -14,15 +14,41 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 jobs:
+  versions:
+    runs-on: self-hosted
+    outputs:
+      kubernetes: ${{ steps.versions.outputs.kubernetes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get Nixpkgs revision
+        run: |
+          # This should not be a URL, because it would allow PRs to run arbitrary code in CI!
+          url=$(jq -r .pins.nixpkgs.url npins/sources.json)
+          echo "url=$url" >> "$GITHUB_ENV"
+      - uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
+        with:
+          nix_path: nixpkgs=${{ env.url }}
+      - name: Supported Kubernetes versions
+        id: versions
+        # Latest patch of the two newest minors with a nixpkgs-k8s pin (default.nix)
+        run: |
+          versions=$(nix-instantiate --eval --strict --json default.nix -A supportedKubernetesVersions)
+          echo "$versions"
+          echo "kubernetes=$versions" >> "$GITHUB_OUTPUT"
   publish:
+    needs: versions
     timeout-minutes: 120
     # Self-hosted: needs to reach keystone/glance on *.rpcu.vpn
     runs-on: self-hosted
     strategy:
+      # One at a time: each job runs its own netbird daemon on the runner host
       max-parallel: 1
+      fail-fast: false
       matrix:
         profile:
           - kaas
+        kubernetes: ${{ fromJson(needs.versions.outputs.kubernetes) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,7 +82,7 @@ jobs:
           for _ in $(seq 30); do [ -S "$RUNNER_TEMP/netbird.sock" ] && break; sleep 1; done
           sudo "$nb" up "${nbargs[@]}" \
             --management-url https://netbird.rpcu.io \
-            --hostname "gha-hephaestus-${{ github.run_id }}" \
+            --hostname "gha-hephaestus-${{ github.run_id }}-${{ strategy.job-index }}" \
             --setup-key-file "$RUNNER_TEMP/netbird.key"
           rm -f "$RUNNER_TEMP/netbird.key"
           for _ in $(seq 60); do
@@ -75,10 +101,10 @@ jobs:
           printf '%s\n' "$CLOUDS_YAML" > "$RUNNER_TEMP/clouds.yaml"
           echo "OS_CLIENT_CONFIG_FILE=$RUNNER_TEMP/clouds.yaml" >> "$GITHUB_ENV"
           echo "OS_CLOUD=openstack" >> "$GITHUB_ENV"
-      - name: Build and publish (${{ matrix.profile }})
+      - name: Build and publish (${{ matrix.profile }} v${{ matrix.kubernetes }})
         run: |
           export NIXPKGS_ALLOW_UNFREE=1
-          nix-shell -p openstackclient qemu-utils jq git --run "scripts/uploadGlanceImage '${{ matrix.profile }}'"
+          nix-shell -p openstackclient qemu-utils jq git --run "scripts/uploadGlanceImage '${{ matrix.profile }}' '${{ matrix.kubernetes }}'"
       - name: Cleanup
         if: always()
         run: |
