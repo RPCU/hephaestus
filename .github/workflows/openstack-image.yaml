@@ -69,7 +69,12 @@ jobs:
       - name: Check OpenStack is reachable
         # The runner host (isaac, didactiklabs/nixOS-server) is on the RPCU
         # netbird mesh; jobs can't run netbird themselves (NoNewPrivileges).
-        run: getent hosts keystone.rpcu.vpn
+        # Runner PATH only has the runners' extraPackages: get the tools from nixpkgs
+        run: |
+          nix-shell -p getent curl --run '
+            getent hosts keystone.rpcu.vpn
+            curl -fsSk -o /dev/null -w "keystone: %{http_code}\n" https://keystone.rpcu.vpn/v3
+          '
       - name: OpenStack credentials
         env:
           CLOUDS_YAML: ${{ secrets.OPENSTACK_CLOUDS_YAML }}
