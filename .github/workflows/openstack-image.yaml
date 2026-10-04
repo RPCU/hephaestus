@@ -88,7 +88,7 @@ jobs:
       - name: Build and publish (${{ matrix.profile }} v${{ matrix.kubernetes }})
         run: |
           export NIXPKGS_ALLOW_UNFREE=1
-          nix-shell -p openstackclient qemu-utils jq git --run "scripts/uploadGlanceImage '${{ matrix.profile }}' '${{ matrix.kubernetes }}'"
+          nix-shell -p openstackclient jq git --run "scripts/uploadGlanceImage '${{ matrix.profile }}' '${{ matrix.kubernetes }}'"
       - name: Cleanup credentials
         if: always()
         run: rm -f "$RUNNER_TEMP/clouds.yaml"
