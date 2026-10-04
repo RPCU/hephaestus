@@ -38,6 +38,12 @@ jobs:
           - makise
           - quinn
     steps:
+      - name: Per-job Nix fetcher cache
+        # The runners' HOME persists between jobs, and once isaac's auto-GC
+        # (min-free) deletes an eval-only fetchTarball source, a shared cache
+        # keeps pointing at the dead store path ("getting status of
+        # /nix/store/…-source/…: No such file or directory").
+        run: echo "XDG_CACHE_HOME=$RUNNER_TEMP/xdg-cache" >> "$GITHUB_ENV"
       - name: Checkout
         uses: actions/checkout@v4
         with:
