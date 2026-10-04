@@ -9,6 +9,7 @@ let
   overrides = {
     customHomeManagerModules = { };
     imports = [ ./fastfetchConfig.nix ];
+    lean = true;
   };
 in
 {
@@ -138,6 +139,7 @@ in
       didactiklabs.enable = true;
     };
     ginx.enable = false;
+    lean.enable = true;
     chrony = {
       enable = true;
       vmconfig = true;

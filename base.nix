@@ -34,7 +34,8 @@ in
   environment = {
     systemPackages = [
       pkgs.efibootmgr
-      pkgs.kitty
+      # A GUI terminal; servers only need its terminfo for SSH sessions
+      (if config.customNixOSModules.lean.enable then pkgs.kitty.terminfo else pkgs.kitty)
       pkgs.killall
       pkgs.git
       pkgs.kubectl
@@ -79,6 +80,7 @@ in
     (hephaestusPath + "/nixosModules/ginx.nix")
     (hephaestusPath + "/nixosModules/sysctl.nix")
     (hephaestusPath + "/nixosModules/getRevision.nix")
+    (hephaestusPath + "/nixosModules/lean.nix")
     (hephaestusPath + "/nixosModules/rpcuIaaSCP")
     (import (hephaestusPath + "/nixosModules/kubernetes") {
       inherit

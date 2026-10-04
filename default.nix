@@ -61,6 +61,9 @@ let
     diskSize = "auto";
     partitionTableType = "efi";
     additionalSpace = "256M";
+    # No nixpkgs channel copy: nix.settings.nix-path already points at the
+    # pinned sources (base.nix), which are in the closure
+    copyChannel = false;
   };
   makeDiskImage =
     format:

@@ -405,3 +405,21 @@ The matching Neutron side (`global_physnet_mtu: 1400`, `path_mtu: 1400`,
 (`infrastructure/yaook/neutron.yaml`). With OVN geneve (38B overhead) this
 yields a ~1362 tenant MTU advertised to VMs via DHCP, which fits inside the
 1500 `enp3s0` underlay. If you change one side, change the other.
+
+---
+
+## kaas images (Glance / CAPO)
+
+`.github/workflows/openstack-image.yaml` publishes the `kaas` profile as raw
+Glance images `hephaestus-kaas[-<rev>]-<release>-v<k8s>` (one per supported
+Kubernetes version) for CAPO, from isaac's runners over netbird.
+
+Raw images carry the whole virtual disk and every compute node downloads them,
+so `kaas` stays lean: `customNixOSModules.lean.enable` (`nixosModules/lean.nix`:
+no documentation, minimal fastfetch, kitty terminfo only) and the `lean = true`
+user override (`homeManagerModules/server.nix`, copied from nixOS-server,
+instead of nixbook's laptop zsh/git: no devenv, yazi, gh, difftastic,
+git-with-svn). Disk layout (`diskImageSettings` in `default.nix`): 256M slack,
+no channel copy; the disk grows on first boot. Baremetal hosts don't set
+`lean`, so their systems are unchanged; keep it that way (module order in
+`userConfig.nix` matters for that).
