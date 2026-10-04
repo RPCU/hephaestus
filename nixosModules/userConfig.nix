@@ -17,6 +17,9 @@ let
       zshConfig.enable = true;
     };
     imports = [ ];
+    # Server home-manager modules instead of nixbook's laptop zsh/git
+    # (homeManagerModules/server.nix), set by lean profiles (kaas).
+    lean = false;
   };
 
   mergedConfig = lib.recursiveUpdate defaultConfig overrides;
@@ -60,8 +63,19 @@ let
             mergedConfig.imports
             [
               ./nixbook-hm-compat.nix
-              (import "${sources.nixbook}//homeManagerModules/zshConfig.nix")
-              (import "${sources.nixbook}//homeManagerModules/gitConfig.nix")
+            ]
+            # Same position as nixbook's zsh/git: module order decides how
+            # lists (home.packages, zsh init) merge.
+            (
+              if mergedConfig.lean then
+                [ ../homeManagerModules/server.nix ]
+              else
+                [
+                  (import "${sources.nixbook}//homeManagerModules/zshConfig.nix")
+                  (import "${sources.nixbook}//homeManagerModules/gitConfig.nix")
+                ]
+            )
+            [
               (import "${sources.nixbook}//homeManagerModules/sshConfig.nix")
               (import "${sources.nixbook}//homeManagerModules/fastfetchConfig.nix")
             ]
