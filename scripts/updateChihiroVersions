@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Offer every Kubernetes version that has a hephaestus-kaas image in Glance in
+chihiro (hestia openchoreo/.../chihiro.yaml).
+
+Reads `openstack image list -f json` on stdin. For each version the newest
+image wins (highest release, then highest -<rev>): its `imagename` option
+(value `hephaestus-kaas[-<rev>]-<release>-{{ chihiro.version }}`) gets the
+version in its `constrain`, and the version is dropped from other options.
+Missing versions are added to CHIHIRO_AVAILABLE_VERSIONS after the first entry
+(the default for new clusters, never changed here). Nothing is ever removed
+from that list. The file is edited as text, keeping its exact formatting.
+
+Usage: openstack image list --status active -f json | updateChihiroVersions <chihiro.yaml>
+"""
+import json
+import re
+import sys
+
+IMAGE = re.compile(r"^hephaestus-kaas(?:-(\d+))?-(\d+\.\d+)-v(\d+\.\d+\.\d+)$")
+OPTION = re.compile(
+    r'(?P<i>[ ]+)- value: "(?P<value>[^"]+)"\n'
+    r'[ ]+label: "(?P<label>[^"]+)"\n'
+    r"[ ]+constrain:\n"
+    r"[ ]+version: \[(?P<versions>[^\]]*)\]\n"
+)
+OPTIONS = re.compile(
+    r"(?P<head>(?P<i>[ ]+)options:\n)(?P<body>(?:(?P=i)  .*\n)+?)(?=(?P=i)default: \"hephaestus-kaas)"
+)
+AVAILABLE = re.compile(r"(- key: CHIHIRO_AVAILABLE_VERSIONS\n[ ]+value: ')([^']*)(')")
+
+
+def semver(v):
+    return tuple(int(x) for x in v.lstrip("v").split("."))
+
+
+def newest_images(names):
+    """version -> (value template, label) of its newest image."""
+    best = {}
+    for name in names:
+        m = IMAGE.match(name)
+        if not m:
+            continue
+        rev, release, k8s = int(m[1] or 1), m[2], "v" + m[3]
+        key = (semver(release), rev)
+        if k8s not in best or key > best[k8s][0]:
+            prefix = "hephaestus-kaas" + (f"-{rev}" if rev > 1 else "")
+            label = release + (f"-{rev}" if rev > 1 else "")
+            best[k8s] = (key, f"{prefix}-{release}-{{{{ chihiro.version }}}}", label)
+    return {v: (value, label) for v, (_, value, label) in best.items()}
+
+
+def rewrite_options(match, wanted):
+    indent, body = match["i"], match["body"]
+    entries = [m.groupdict() for m in OPTION.finditer(body)]
+    if "".join(m[0] for m in OPTION.finditer(body)) != body:
+        sys.exit("unexpected imagename options format, refusing to edit")
+    options = {}
+    for e in entries:
+        versions = [v.strip().strip('"') for v in e["versions"].split(",") if v.strip()]
+        options[e["value"]] = [e["label"], versions, e["i"]]
+    item = entries[0]["i"] if entries else indent + "  "
+    for version, (value, label) in wanted.items():
+        # A version belongs to its newest image only
+        for other, opt in options.items():
+            if other != value and version in opt[1]:
+                opt[1].remove(version)
+        opt = options.setdefault(value, [label, [], item])
+        if version not in opt[1]:
+            opt[1].append(version)
+    out = []
+    for value, (label, versions, i) in options.items():
+        if not versions:
+            continue
+        versions = sorted(versions, key=semver, reverse=True)
+        out.append(
+            f'{i}- value: "{value}"\n'
+            f'{i}  label: "{label}"\n'
+            f"{i}  constrain:\n"
+            f"{i}    version: [{', '.join(json.dumps(v) for v in versions)}]\n"
+        )
+    return match["head"] + "".join(out)
+
+
+def rewrite_available(match, wanted):
+    current = [v for v in match[2].split(",") if v]
+    head, rest = current[:1], current[1:]
+    rest += [v for v in wanted if v not in current]
+    rest.sort(key=semver, reverse=True)
+    return match[1] + ",".join(head + rest) + match[3]
+
+
+def main():
+    path = sys.argv[1]
+    names = [i["Name"] for i in json.load(sys.stdin)]
+    wanted = newest_images(names)
+    if not wanted:
+        sys.exit("no hephaestus-kaas images found, refusing to edit")
+    with open(path) as f:
+        text = f.read()
+    text, n_opts = OPTIONS.subn(lambda m: rewrite_options(m, wanted), text)
+    text, n_avail = AVAILABLE.subn(lambda m: rewrite_available(m, wanted), text)
+    if n_opts == 0 or n_opts != n_avail:
+        sys.exit(f"expected one imagename block per CHIHIRO_AVAILABLE_VERSIONS ({n_opts} vs {n_avail})")
+    with open(path, "w") as f:
+        f.write(text)
+    for v in sorted(wanted, key=semver, reverse=True):
+        print(f"{v}: {wanted[v][0].replace('{{ chihiro.version }}', v)}")
+
+
+if __name__ == "__main__":
+    main()
