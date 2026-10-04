@@ -54,16 +54,24 @@ let
       environment.etc."nixos/version".source = lib.mkForce (builtins.toFile "projectGit.json" "{}");
     };
   };
+  # Disk layout of the images. Glance stores them raw (the whole virtual
+  # disk), so keep the slack small: the root partition and filesystem grow to
+  # the VM's disk on first boot (boot.growPartition, autoResize).
+  diskImageSettings = {
+    diskSize = "auto";
+    partitionTableType = "efi";
+    additionalSpace = "256M";
+  };
   makeDiskImage =
     format:
-    import <nixpkgs/nixos/lib/make-disk-image.nix> {
-      inherit lib pkgs format;
-      inherit (nixosSystem) config;
-      diskSize = "auto";
-      configFile = ./profiles/${profile}/configuration.nix;
-      partitionTableType = "efi";
-      additionalSpace = "1G";
-    };
+    import <nixpkgs/nixos/lib/make-disk-image.nix> (
+      diskImageSettings
+      // {
+        inherit lib pkgs format;
+        inherit (nixosSystem) config;
+        configFile = ./profiles/${profile}/configuration.nix;
+      }
+    );
   buildQcow2 = makeDiskImage "qcow2-compressed";
   inherit (pkgs) lib;
 in
@@ -89,9 +97,14 @@ in
     name = "hephaestus-${profile}";
     release = nixosSystem.config.system.nixos.release;
     kubernetesVersion = "v${nixosSystem.config.customNixOSModules.kubernetes.version.kubeadm}";
-    fingerprint = builtins.unsafeDiscardStringContext (
-      builtins.baseNameOf nixosSystemNoRev.config.system.build.toplevel.outPath
-    );
+    # OS (toplevel without git metadata) + disk layout: either changing
+    # publishes a new image.
+    fingerprint =
+      builtins.unsafeDiscardStringContext (
+        builtins.baseNameOf nixosSystemNoRev.config.system.build.toplevel.outPath
+      )
+      + "-"
+      + builtins.substring 0 8 (builtins.hashString "sha256" (builtins.toJSON diskImageSettings));
   };
   # Kubernetes versions to publish Glance images for: the latest patch of the
   # two newest minors that have a nixpkgs-k8s-<x.y.z> pin, newest first.
