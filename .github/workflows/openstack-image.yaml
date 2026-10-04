@@ -183,4 +183,5 @@ jobs:
         if: steps.cpr.outputs.pull-request-operation == 'created' || steps.cpr.outputs.pull-request-operation == 'updated'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" -R RPCU/hestia --rebase --delete-branch
+        # gh isn't on the NixOS runners' PATH
+        run: nix-shell -p gh --run 'gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" -R RPCU/hestia --rebase --delete-branch'
