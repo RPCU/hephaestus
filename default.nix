@@ -65,9 +65,6 @@ let
       additionalSpace = "1G";
     };
   buildQcow2 = makeDiskImage "qcow2-compressed";
-  # Raw disk image ($out/nixos.img), what Glance on Ceph RBD needs for
-  # copy-on-write clones. Built straight into the store so CI uploads it as-is.
-  buildRaw = makeDiskImage "raw";
   inherit (pkgs) lib;
 in
 {
@@ -76,7 +73,6 @@ in
     lib
     nixosSystem
     buildQcow2
-    buildRaw
     ;
   buildIso =
     (isoInstall.extendModules {
