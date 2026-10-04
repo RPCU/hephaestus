@@ -39,10 +39,10 @@ jobs:
   publish:
     needs: versions
     timeout-minutes: 120
-    # Self-hosted: needs to reach keystone/glance on *.rpcu.vpn
+    # Self-hosted: isaac reaches keystone/glance on *.rpcu.vpn through netbird
     runs-on: self-hosted
     strategy:
-      # One at a time: each job runs its own netbird daemon on the runner host
+      # One at a time: images are several GB each on the runner disk
       max-parallel: 1
       fail-fast: false
       matrix:
@@ -66,31 +66,10 @@ jobs:
             fallback = true
             trusted-public-keys = didactiklabs-nixcache:PxLKN0+ZkP07M8g8/B6xbP6A4MYpqQg6LH7V3muiy/0= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
             substituters = https://s3.didactiklabs.io/nix-cache https://cache.nixos.org/
-      - name: Join netbird
-        # The runner is not on the mesh; keystone/glance (*.rpcu.vpn) only are.
-        # Use an *ephemeral* setup key so the peer is dropped automatically
-        # once it goes offline.
-        env:
-          NB_SETUP_KEY: ${{ secrets.NETBIRD_SETUP_KEY }}
-        run: |
-          nb=$(nix-build '<nixpkgs>' -A netbird --no-out-link)/bin/netbird
-          nbargs=(--daemon-addr "unix://$RUNNER_TEMP/netbird.sock" --log-file "$RUNNER_TEMP/netbird.log")
-          echo "NB=$nb" >> "$GITHUB_ENV"
-          echo "NB_DAEMON_ADDR=unix://$RUNNER_TEMP/netbird.sock" >> "$GITHUB_ENV"
-          (umask 077; printf '%s' "$NB_SETUP_KEY" > "$RUNNER_TEMP/netbird.key")
-          sudo nohup "$nb" service run --config "$RUNNER_TEMP/netbird.json" "${nbargs[@]}" >/dev/null 2>&1 &
-          for _ in $(seq 30); do [ -S "$RUNNER_TEMP/netbird.sock" ] && break; sleep 1; done
-          sudo "$nb" up "${nbargs[@]}" \
-            --management-url https://netbird.rpcu.io \
-            --hostname "gha-hephaestus-${{ github.run_id }}-${{ strategy.job-index }}" \
-            --setup-key-file "$RUNNER_TEMP/netbird.key"
-          rm -f "$RUNNER_TEMP/netbird.key"
-          for _ in $(seq 60); do
-            getent hosts keystone.rpcu.vpn >/dev/null && break
-            sleep 2
-          done
-          sudo "$nb" status "${nbargs[@]}"
-          getent hosts keystone.rpcu.vpn
+      - name: Check OpenStack is reachable
+        # The runner host (isaac, didactiklabs/nixOS-server) is on the RPCU
+        # netbird mesh; jobs can't run netbird themselves (NoNewPrivileges).
+        run: getent hosts keystone.rpcu.vpn
       - name: OpenStack credentials
         env:
           CLOUDS_YAML: ${{ secrets.OPENSTACK_CLOUDS_YAML }}
@@ -105,12 +84,6 @@ jobs:
         run: |
           export NIXPKGS_ALLOW_UNFREE=1
           nix-shell -p openstackclient qemu-utils jq git --run "scripts/uploadGlanceImage '${{ matrix.profile }}' '${{ matrix.kubernetes }}'"
-      - name: Cleanup
+      - name: Cleanup credentials
         if: always()
-        run: |
-          rm -f "$RUNNER_TEMP/clouds.yaml"
-          if [ -n "${NB:-}" ]; then
-            sudo "$NB" down --daemon-addr "$NB_DAEMON_ADDR" || true
-            sudo pkill -f "$NB service run" || true
-            sudo rm -f "$RUNNER_TEMP/netbird.json"
-          fi
+        run: rm -f "$RUNNER_TEMP/clouds.yaml"
