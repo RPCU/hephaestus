@@ -8,6 +8,8 @@
 # when the OS actually changed: the image carries a `hephaestus_fingerprint`
 # property (the system toplevel without git metadata) and the upload is skipped
 # when an active image with the same fingerprint already exists.
+# Images are public, so CAPO clusters in every OpenStack project can use them
+# (needs the image_publisher role, see argus hephaestus-ci.yaml).
 #
 # Needs openstack credentials in the environment (OS_CLOUD + clouds.yaml, or
 # OS_* variables) and: nix-build, openstack, qemu-img, jq, git.
@@ -27,9 +29,11 @@ k8s=$(jq -r .kubernetesVersion <<<"$info")
 fingerprint=$(jq -r .fingerprint <<<"$info")
 suffix="$release-$k8s"
 
-existing=$(openstack image list --property "hephaestus_fingerprint=$fingerprint" --status active -f value -c Name)
+existing=$(openstack image list --property "hephaestus_fingerprint=$fingerprint" --status active -f value -c ID -c Name -c Visibility --long)
 if [ -n "$existing" ]; then
   echo "Up to date, image already in Glance: $existing"
+  # Images published before they were public
+  awk '$NF != "public" {print $1}' <<<"$existing" | xargs -r -n1 openstack image set --public
   exit 0
 fi
 
@@ -59,7 +63,7 @@ qemu-img convert -f qcow2 -O raw "$out/nixos.qcow2" "$raw"
 if ! openstack image create "$name" \
   --disk-format raw \
   --container-format bare \
-  --private \
+  --public \
   --file "$raw" \
   --property os_distro=nixos \
   --property os_version="$release" \
