@@ -10,7 +10,7 @@
 # when an active image with the same fingerprint already exists.
 #
 # Needs openstack credentials in the environment (OS_CLOUD + clouds.yaml, or
-# OS_* variables) and: nix-build, openstack, qemu-img, jq, git.
+# OS_* variables) and: nix-build, openstack, jq, git.
 # Usage: uploadGlanceImage [profile] [kubernetes version]
 #   profile defaults to kaas, the version to the profile's own (e.g. 1.37.1).
 set -euo pipefail
@@ -45,15 +45,12 @@ else
 fi
 echo "Publishing $name (fingerprint $fingerprint)"
 
-out=$(nix-build default.nix -A buildQcow2 "${nixargs[@]}" --no-out-link)
-
-mkdir -p output
-chmod +w output -R
-raw="output/$name.raw"
-trap 'rm -f "$raw"' EXIT
 # Glance is backed by Ceph RBD with show_image_direct_url: images must be raw
-# so nova/cinder can create copy-on-write clones.
-qemu-img convert -p -f qcow2 -O raw "$out/nixos.qcow2" "$raw"
+# so nova/cinder can create copy-on-write clones. Build the raw image straight
+# into the store and upload it from there: the runners' work dir is a tmpfs,
+# too small for a multi-GB copy.
+out=$(nix-build default.nix -A buildRaw "${nixargs[@]}" --no-out-link)
+raw="$out/nixos.img"
 
 if ! openstack image create "$name" \
   --disk-format raw \
