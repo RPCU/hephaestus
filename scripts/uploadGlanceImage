@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Build the qcow2 for a profile and publish it to Glance for CAPO.
+#
+# Image name: hephaestus-<profile>[-<rev>]-<nixos release>-v<k8s version>
+#   e.g. hephaestus-kaas-26.05-v1.36.1, then hephaestus-kaas-2-26.05-v1.36.1, ...
+# Existing images are never replaced or deleted (running clusters reference them
+# by name, and CAPO fails on duplicate names). A new revision is only uploaded
+# when the OS actually changed: the image carries a `hephaestus_fingerprint`
+# property (the system toplevel without git metadata) and the upload is skipped
+# when an active image with the same fingerprint already exists.
+#
+# Needs openstack credentials in the environment (OS_CLOUD + clouds.yaml, or
+# OS_* variables) and: nix-build, openstack, qemu-img, jq, git.
+# Usage: uploadGlanceImage [profile]   (default: kaas)
+set -euo pipefail
+profile="${1:-kaas}"
+
+info=$(nix-instantiate --eval --strict --json --read-write-mode default.nix -A imageInfo --argstr profile "$profile")
+base=$(jq -r .name <<<"$info")
+release=$(jq -r .release <<<"$info")
+k8s=$(jq -r .kubernetesVersion <<<"$info")
+fingerprint=$(jq -r .fingerprint <<<"$info")
+suffix="$release-$k8s"
+
+existing=$(openstack image list --property "hephaestus_fingerprint=$fingerprint" --status active -f value -c Name)
+if [ -n "$existing" ]; then
+  echo "Up to date, image already in Glance: $existing"
+  exit 0
+fi
+
+# Next free revision for this release/k8s version (an unsuffixed name is rev 1)
+pattern="^${base}(-([0-9]+))?-${suffix//./\\.}$"
+rev=$(openstack image list -f value -c Name |
+  sed -nE "s/${pattern}/\2/p" |
+  sed 's/^$/1/' | sort -n | tail -n1)
+if [ -z "$rev" ]; then
+  name="$base-$suffix"
+else
+  name="$base-$((rev + 1))-$suffix"
+fi
+echo "Publishing $name (fingerprint $fingerprint)"
+
+out=$(nix-build default.nix -A buildQcow2 --argstr profile "$profile" --no-out-link)
+
+mkdir -p output
+chmod +w output -R
+raw="output/$name.raw"
+trap 'rm -f "$raw"' EXIT
+# Glance is backed by Ceph RBD with show_image_direct_url: images must be raw
+# so nova/cinder can create copy-on-write clones.
+qemu-img convert -p -f qcow2 -O raw "$out/nixos.qcow2" "$raw"
+
+if ! openstack image create "$name" \
+  --disk-format raw \
+  --container-format bare \
+  --private \
+  --file "$raw" \
+  --property os_distro=nixos \
+  --property os_version="$release" \
+  --property os_type=linux \
+  --property hw_firmware_type=uefi \
+  --property hw_qemu_guest_agent=yes \
+  --property kubernetes_version="$k8s" \
+  --property hephaestus_profile="$profile" \
+  --property hephaestus_fingerprint="$fingerprint" \
+  --property hephaestus_commit="$(git rev-parse HEAD)"; then
+  # Don't leave a half-uploaded (queued) image holding the name
+  openstack image list --name "$name" -f value -c ID -c Status |
+    awk '$2 != "active" {print $1}' |
+    xargs -r openstack image delete
+  exit 1
+fi
+echo "Published $name"
