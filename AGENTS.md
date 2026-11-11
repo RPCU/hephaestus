@@ -275,7 +275,13 @@ Git Repository Update
 
 - Virtual IP: 10.0.0.5:6443
 - Interface: VLAN 4000 on primary network
-- Features: ARP-based, leader election, service load balancing
+- Features: ARP-based, leader election; control-plane VIP only. No `--services`
+  (`svc_enable: "false"`): Cilium LB-IPAM + L2 announcements own the
+  LoadBalancer IPs (10.0.0.240-253). With services mode on, the kube-vip leader
+  bound every LB IP as a local /32 and out-ARPed Cilium, so traffic forwarded
+  to it from NetBird (`wt0`, not a Cilium device) got "connection refused".
+  The manifest is written once at bootstrap: existing nodes need
+  `svc_enable` set to `"false"` in `/etc/kubernetes/manifests/kube-vip.yaml`.
 
 **Functions:**
 
