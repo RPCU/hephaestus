@@ -96,9 +96,9 @@ in
     # Hosts' tokens go in /etc/tandem-relay/host-tokens (by hand, root 0600).
     tandemRelay = {
       enable = true;
-      # TODO: pin the first image tag tandem's CI publishes to
-      # zot.rpcu.io/public/tandem-relay (`<sha8>` or a version).
-      # tag = "...";
+      # zot.rpcu.io/public/tandem-relay, published by RPCU/tandem's CI
+      # (image.yaml): the commit's first 8 hex digits, or a version tag.
+      tag = "2b07c959";
     };
   };
   imports = [
