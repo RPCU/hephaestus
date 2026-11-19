@@ -292,6 +292,45 @@ Git Repository Update
 
 ---
 
+### 10. Tandem Relay - Co-op UDP Relay
+
+**Type:** Application service (Docker container managed by NixOS)  
+**Location:** `nixosModules/tandemRelay/default.nix`  
+**Image:** `zot.rpcu.io/public/tandem-relay:<tag>` (published by tandem's CI,
+tags `<sha8>` and versions; `customNixOSModules.tandemRelay.tag`)  
+**Status:** Enabled on sunraku with `customNixOSModules.tandemRelay.enable`
+(in `profiles/sunraku/default.nix`)
+
+**Purpose:** Relays UDP traffic between the players of tandem (a Cyberpunk
+2077 co-op mod, https://github.com/Banh-Canh/tandem, operator guide
+`docs/relay.md`) who cannot reach each other directly, and hands hosts a join
+code. Keeps nothing on disk.
+
+**Ports:**
+
+- **UDP 27460** (`udpPort`): players, on every address (IPv4 and IPv6),
+  opened by `openFirewall` (the firewall itself is off in `base.nix`)
+- **TCP 8080** (`httpListen`, default `127.0.0.1:8080`): `/healthz`,
+  `/readyz`, `/metrics`, `/debug/vars`; never public. Set it to the host's
+  NetBird (`wt0`) address to scrape it over the VPN
+- UDP 27461 (`frontPort`) only for a fleet of replicas (`peers`): sunraku
+  runs a lone relay, with neither
+
+**Container (`docker-tandem-relay.service`):**
+
+- `--network=host`: the relay must see players' real source addresses (its
+  rate and join code limits are per source); Docker's port publishing can
+  hide them
+- Read-only rootfs, `--cap-drop=ALL`, `no-new-privileges`, user
+  `65532:65532` (the image's), 128 MiB, 64 pids; logs to journald;
+  restarted always by systemd. No health check: the image has no shell
+- Host tokens (who may open a session): `/etc/tandem-relay/host-tokens`,
+  written by hand (root, 0600, one `tandem-relay token` per host), never in
+  Git or the Nix store. The service copies it for the container at start and
+  is skipped until it exists; restart the service after changing it
+
+---
+
 ## Deployment Architecture
 
 ### Cluster Initialization Flow
@@ -347,13 +386,14 @@ hive.nix (Colmena deployment framework)
   │  ├─ chrony.nix
   │  ├─ ginx.nix (conditionally)
   │  ├─ rpcuIaaSCP.nix (conditionally)
+  │  ├─ tandemRelay/default.nix (conditionally)
   │  └─ SSH Agent (always)
   │
   ├─ profiles/*/default.nix (node-specific config)
   │  ├─ lucy/default.nix (RpcuIaaSCP + cluster config)
   │  ├─ makise/default.nix (RpcuIaaSCP + cluster config)
   │  ├─ quinn/default.nix (RpcuIaaSCP + cluster config)
-  │  ├─ sunraku/default.nix (VPS + netbird)
+  │  ├─ sunraku/default.nix (VPS + netbird + tandem relay)
   │  └─ kaas/default.nix (cloud VM + cloud-init)
   │
   └─ users/rpcu/* (user configurations)
@@ -363,17 +403,18 @@ hive.nix (Colmena deployment framework)
 
 ## Summary
 
-| Agent          | Type          | Status   | Scope                | Purpose                 |
-| -------------- | ------------- | -------- | -------------------- | ----------------------- |
-| **Kubelet**    | K8s Node      | ACTIVE   | All k8s nodes        | Pod/container lifecycle |
-| **SSH Agent**  | System        | ACTIVE   | All nodes            | Auth for deployments    |
-| **QEMU Guest** | Cloud         | ACTIVE   | kaas profile         | VM management           |
-| **Cloud-Init** | Cloud Init    | ACTIVE   | kaas profile         | Instance bootstrap      |
-| **Netbird**    | Network VPN   | ACTIVE   | RpcuIaaSCP + sunraku | Mesh VPN connectivity   |
-| **Colmena**    | Orchestration | ACTIVE   | All (deployment)     | Config management       |
-| **Ginx**       | GitOps        | OPTIONAL | Configurable         | Continuous deployment   |
-| **Kubeadm**    | K8s Bootstrap | ACTIVE   | k8s nodes            | Cluster init/join       |
-| **Kube-VIP**   | K8s HA        | ACTIVE   | Control plane        | API server virtual IP   |
+| Agent            | Type          | Status   | Scope                | Purpose                 |
+| ---------------- | ------------- | -------- | -------------------- | ----------------------- |
+| **Kubelet**      | K8s Node      | ACTIVE   | All k8s nodes        | Pod/container lifecycle |
+| **SSH Agent**    | System        | ACTIVE   | All nodes            | Auth for deployments    |
+| **QEMU Guest**   | Cloud         | ACTIVE   | kaas profile         | VM management           |
+| **Cloud-Init**   | Cloud Init    | ACTIVE   | kaas profile         | Instance bootstrap      |
+| **Netbird**      | Network VPN   | ACTIVE   | RpcuIaaSCP + sunraku | Mesh VPN connectivity   |
+| **Colmena**      | Orchestration | ACTIVE   | All (deployment)     | Config management       |
+| **Ginx**         | GitOps        | OPTIONAL | Configurable         | Continuous deployment   |
+| **Kubeadm**      | K8s Bootstrap | ACTIVE   | k8s nodes            | Cluster init/join       |
+| **Kube-VIP**     | K8s HA        | ACTIVE   | Control plane        | API server virtual IP   |
+| **Tandem Relay** | App (Docker)  | ACTIVE   | sunraku              | Co-op game UDP relay    |
 
 ---
 

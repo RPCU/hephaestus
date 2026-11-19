@@ -81,6 +81,7 @@ in
     (hephaestusPath + "/nixosModules/sysctl.nix")
     (hephaestusPath + "/nixosModules/getRevision.nix")
     (hephaestusPath + "/nixosModules/lean.nix")
+    (hephaestusPath + "/nixosModules/tandemRelay")
     (hephaestusPath + "/nixosModules/rpcuIaaSCP")
     (import (hephaestusPath + "/nixosModules/kubernetes") {
       inherit

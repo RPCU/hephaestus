@@ -91,6 +91,15 @@ in
       didactiklabs.enable = true;
     };
     chrony.enable = true;
+    # tandem's co-op relay, a lone replica: players reach UDP 27460 on
+    # sunraku's public addresses; /healthz and /metrics stay on loopback.
+    # Hosts' tokens go in /etc/tandem-relay/host-tokens (by hand, root 0600).
+    tandemRelay = {
+      enable = true;
+      # TODO: pin the first image tag tandem's CI publishes to
+      # zot.rpcu.io/public/tandem-relay (`<sha8>` or a version).
+      # tag = "...";
+    };
   };
   imports = [
     (import ../../users/rpcu {
