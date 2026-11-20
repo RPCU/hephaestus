@@ -99,6 +99,10 @@ in
       # zot.rpcu.io/public/tandem-relay, published by RPCU/tandem's CI
       # (image.yaml): the commit's first 8 hex digits, or a version tag.
       tag = "2b07c959";
+      # Fetched by Nix, loaded into Docker: Docker can't pull anonymously
+      # from zot (see the module's imageDigest).
+      imageDigest = "sha256:795145aa57b6c720eb73c292b81d2667742ff4f70bfc8caf6719f0ee8897bddd";
+      imageHash = "sha256-B4/A0r7c3F4pqVrAATK84IqKk5nPfDbKb5v1oB8fMtw=";
     };
   };
   imports = [

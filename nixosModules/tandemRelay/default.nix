@@ -5,7 +5,7 @@
   ...
 }:
 # tandem-relay: the UDP relay of tandem, a co-op mod for Cyberpunk 2077
-# (https://github.com/Banh-Canh/tandem, docs/relay.md). It forwards opaque
+# (https://github.com/RPCU/tandem, docs/relay.md). It forwards opaque
 # UDP datagrams between a session's host and its guests and hands hosts a
 # join code; it keeps nothing on disk. Run here as a Docker container
 # managed by systemd (virtualisation.oci-containers).
@@ -39,6 +39,25 @@ in
       # tag) once it exists; this placeholder is not a published image.
       default = "unpublished";
       description = "The image's tag: a commit (`<sha8>`) or a version.";
+    };
+    imageDigest = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "sha256:795145aa57b6c720eb73c292b81d2667742ff4f70bfc8caf6719f0ee8897bddd";
+      description = ''
+        The tag's manifest digest. With `imageHash`, Nix fetches the image at
+        build time (dockerTools.pullImage, anonymous) and Docker loads it,
+        never pulling. Needed for zot.rpcu.io: it sends a Basic challenge even
+        on anonymous reads, and Docker then refuses to pull without
+        credentials ("no basic auth credentials"). Get both with
+        `nix-prefetch-docker --image-name IMAGE --image-tag TAG`.
+      '';
+    };
+    imageHash = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "sha256-B4/A0r7c3F4pqVrAATK84IqKk5nPfDbKb5v1oB8fMtw=";
+      description = "Nix hash of the fetched image (`hash` from nix-prefetch-docker).";
     };
     udpPort = lib.mkOption {
       type = lib.types.port;
@@ -128,6 +147,10 @@ in
         assertion = !lib.hasPrefix builtins.storeDir cfg.hostTokensFile;
         message = "customNixOSModules.tandemRelay.hostTokensFile must not be in the Nix store (world-readable).";
       }
+      {
+        assertion = (cfg.imageDigest == null) == (cfg.imageHash == null);
+        message = "customNixOSModules.tandemRelay.imageDigest and imageHash go together.";
+      }
     ];
 
     virtualisation.docker.enable = true;
@@ -135,6 +158,15 @@ in
       backend = "docker";
       containers.${name} = {
         image = "${cfg.image}:${cfg.tag}";
+        imageFile = lib.mkIf (cfg.imageDigest != null) (
+          pkgs.dockerTools.pullImage {
+            imageName = cfg.image;
+            inherit (cfg) imageDigest;
+            hash = cfg.imageHash;
+            finalImageName = cfg.image;
+            finalImageTag = cfg.tag;
+          }
+        );
         user = "${toString uid}:${toString uid}";
         log-driver = "journald";
         # The image's entrypoint is tandem-relay; this replaces its `serve`.
