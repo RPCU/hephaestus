@@ -108,8 +108,9 @@ in
         Host token file on this machine, never in the Nix store: one hex
         token per line (`tandem-relay token` makes one), root-owned, 0600.
         The service gives the container a read-only copy at each start (the
-        relay reads it once: restart the service after changing it). Until
-        the file exists the service is skipped, not failed.
+        relay reads it once: restart the service after changing it). The
+        relay runs open, so the file is optional: without it the copy is
+        empty and every host pays the open mode's proof of work and caps.
       '';
     };
     drainTimeout = lib.mkOption {
@@ -206,7 +207,6 @@ in
     };
 
     systemd.services.${serviceName} = {
-      unitConfig.ConditionPathExists = cfg.hostTokensFile;
       serviceConfig = {
         # The container runs with --rm, so systemd restarts it, not Docker.
         Restart = lib.mkForce "always";
@@ -214,8 +214,13 @@ in
         RuntimeDirectory = name;
         # Only dockerd (root) reads it, to bind-mount the copy.
         RuntimeDirectoryMode = "0700";
+        # The token file, or an empty one when there is none (open mode).
         ExecStartPre = [
-          "${pkgs.coreutils}/bin/install -m 0400 -o ${toString uid} -g ${toString uid} ${cfg.hostTokensFile} ${runtimeTokens}"
+          (pkgs.writeShellScript "${name}-tokens" ''
+            src=${lib.escapeShellArg cfg.hostTokensFile}
+            [ -f "$src" ] || src=/dev/null
+            ${pkgs.coreutils}/bin/install -m 0400 -o ${toString uid} -g ${toString uid} "$src" ${runtimeTokens}
+          '')
         ];
       };
     };

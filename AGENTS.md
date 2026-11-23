@@ -327,7 +327,8 @@ code. Keeps nothing on disk.
 - Host tokens (who may open a session): `/etc/tandem-relay/host-tokens`,
   written by hand (root, 0600, one `tandem-relay token` per host), never in
   Git or the Nix store. The service copies it for the container at start and
-  is skipped until it exists; restart the service after changing it
+  starts without it (the relay runs open: an empty copy, every host on the
+  open mode's caps); restart the service after changing it
 
 ---
 
