@@ -93,7 +93,7 @@ in
     chrony.enable = true;
     # tandem's co-op relay, a lone replica: players reach UDP 27460 on
     # sunraku's public addresses; /healthz and /metrics stay on loopback.
-    # Hosts' tokens go in /etc/tandem-relay/host-tokens (by hand, root 0600).
+    # Hosts' tokens, optional (the relay runs open): /etc/tandem-relay/host-tokens (by hand, root 0600).
     tandemRelay = {
       enable = true;
       # zot.rpcu.io/public/tandem-relay, published by RPCU/tandem's CI
